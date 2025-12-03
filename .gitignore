@@ -162,3 +162,4 @@ f2_gui_secrets
 .pylintrc
 download_history.json
 gui_config.json
+.vscode/
