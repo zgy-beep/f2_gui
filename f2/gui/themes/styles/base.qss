@@ -1,0 +1,632 @@
+/* ============================================
+   F2 GUI 基础样式表
+   Base Stylesheet - 定义布局、尺寸、字体等基础样式
+   颜色由主题样式表（dark.qss/light.qss）定义
+   ============================================ */
+
+/* ==========================================
+   全局基础样式
+   ========================================== */
+
+* {
+    font-family: "Microsoft YaHei UI", "Segoe UI", "PingFang SC", sans-serif;
+}
+
+QWidget {
+    background-color: transparent;
+    font-size: 13px;
+}
+
+QWidget[transparent="true"] {
+    background: transparent;
+    background-color: transparent;
+}
+
+QFrame {
+    background: transparent;
+    background-color: transparent;
+}
+
+/* ==========================================
+   侧边栏
+   ========================================== */
+
+QFrame#sidebar QLabel {
+    background: transparent;
+}
+
+/* 侧边栏头部卡片 */
+QFrame#sidebarHeaderCard {
+    border-radius: 12px;
+}
+
+QFrame#sidebarHeaderCard QLabel {
+    background: transparent;
+}
+
+/* Logo 容器 */
+QFrame#logoContainer {
+    border-radius: 10px;
+}
+
+/* 侧边栏标题 */
+QLabel#sidebarTitle {
+    font-weight: bold;
+}
+
+/* 侧边栏副标题 */
+QLabel#sidebarSubtitle {
+    font-size: 10px;
+}
+
+/* 侧边栏区域标签 */
+QLabel#sidebarSectionLabel {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    background: transparent;
+}
+
+/* ==========================================
+   导航按钮
+   ========================================== */
+
+QPushButton#navButton {
+    text-align: left;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+QPushButton#navButton:checked {
+    font-weight: 600;
+}
+
+/* 版本标签 */
+QLabel#versionLabel {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* ==========================================
+   内容区域
+   ========================================== */
+
+QFrame#contentArea {
+    border: none;
+    border-radius: 0px;
+}
+
+/* 页面标题栏 */
+QFrame#pageTitleBar {
+    border-radius: 0px;
+    min-height: 44px;
+    max-height: 44px;
+}
+
+QLabel#pageTitle {
+    font-size: 16px;
+    font-weight: 600;
+    background: transparent;
+}
+
+/* ==========================================
+   标题样式
+   ========================================== */
+
+QLabel#headerTitle {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+QLabel#sectionTitle {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+QLabel#cardTitle {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+QLabel#subtitle {
+    font-size: 12px;
+}
+
+/* ==========================================
+   通用按钮样式 - 统一大小，扁平化设计
+   ========================================== */
+
+QPushButton {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    min-height: 24px;
+    max-height: 26px;
+    min-width: 54px;
+}
+
+/* Tab 按钮 - 保留用于可选中状态 */
+QPushButton#tabButton {
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 12px;
+    min-height: 24px;
+    max-height: 26px;
+    min-width: 46px;
+}
+
+/* ==========================================
+   滚动区域
+   ========================================== */
+
+QScrollArea {
+    border: none;
+    background: transparent;
+}
+
+QScrollArea > QWidget > QWidget {
+    background: transparent;
+}
+
+/* 滚动条 - 垂直 */
+QScrollBar:vertical {
+    width: 8px;
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    min-height: 30px;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+/* 滚动条 - 水平 */
+QScrollBar:horizontal {
+    height: 8px;
+    margin: 0px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    min-width: 30px;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: transparent;
+}
+
+/* ==========================================
+   输入框
+   ========================================== */
+
+QLineEdit {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+QLineEdit:focus {
+    outline: none;
+}
+
+QLineEdit#urlInput {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+/* 批量输入框 */
+QTextEdit#batchInput {
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+QTextEdit#batchInput:focus {
+    outline: none;
+}
+
+/* ==========================================
+   下拉框 (QComboBox)
+   ========================================== */
+
+QComboBox {
+    padding: 4px 10px;
+    padding-right: 24px;
+    border-radius: 4px;
+    font-size: 12px;
+    min-height: 18px;
+    max-height: 22px;
+}
+
+QComboBox:focus {
+    outline: none;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 18px;
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    margin-right: 4px;
+}
+
+QComboBox::down-arrow {
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox QAbstractItemView {
+    border-radius: 4px;
+    padding: 4px;
+    outline: none;
+}
+
+QComboBox QAbstractItemView::item {
+    background-color: transparent;
+    padding: 6px 10px;
+    border-radius: 4px;
+    min-height: 18px;
+}
+
+/* ==========================================
+   复选框
+   ========================================== */
+
+QCheckBox {
+    spacing: 8px;
+    font-size: 13px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+/* ==========================================
+   数值输入框 (QSpinBox)
+   ========================================== */
+
+QSpinBox,
+QDoubleSpinBox {
+    padding: 2px 4px;
+    padding-right: 20px;
+    border-radius: 4px;
+    font-size: 12px;
+    min-height: 22px;
+    min-width: 50px;
+}
+
+QSpinBox:focus,
+QDoubleSpinBox:focus {
+    outline: none;
+}
+
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 18px;
+    height: 11px;
+    border: none;
+    margin-top: 2px;
+    margin-right: 2px;
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 18px;
+    height: 11px;
+    border: none;
+    margin-bottom: 2px;
+    margin-right: 2px;
+}
+
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow {
+    width: 10px;
+    height: 10px;
+}
+
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow {
+    width: 10px;
+    height: 10px;
+}
+
+/* ==========================================
+   日期时间选择器
+   ========================================== */
+
+QDateEdit,
+QTimeEdit,
+QDateTimeEdit {
+    padding: 4px 6px;
+    padding-right: 18px;
+    border-radius: 4px;
+    font-size: 12px;
+    min-height: 18px;
+    max-height: 22px;
+}
+
+QDateEdit:focus,
+QTimeEdit:focus,
+QDateTimeEdit:focus {
+    outline: none;
+}
+
+QDateEdit::up-button,
+QTimeEdit::up-button,
+QDateTimeEdit::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 16px;
+    height: 10px;
+    border: none;
+    margin-top: 1px;
+    margin-right: 2px;
+}
+
+QDateEdit::down-button,
+QTimeEdit::down-button,
+QDateTimeEdit::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 16px;
+    height: 10px;
+    border: none;
+    margin-bottom: 1px;
+    margin-right: 2px;
+}
+
+QDateEdit::up-arrow,
+QTimeEdit::up-arrow,
+QDateTimeEdit::up-arrow {
+    width: 10px;
+    height: 10px;
+}
+
+QDateEdit::down-arrow,
+QTimeEdit::down-arrow,
+QDateTimeEdit::down-arrow {
+    width: 10px;
+    height: 10px;
+}
+
+QDateEdit::drop-down,
+QTimeEdit::drop-down,
+QDateTimeEdit::drop-down {
+    border: none;
+    width: 18px;
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    margin-right: 4px;
+}
+
+/* ==========================================
+   多行文本框
+   ========================================== */
+
+QTextEdit {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+QTextEdit:focus {
+    outline: none;
+}
+
+QPlainTextEdit {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+QPlainTextEdit:focus {
+    outline: none;
+}
+
+/* ==========================================
+   进度条
+   ========================================== */
+
+QProgressBar {
+    border-radius: 4px;
+    text-align: center;
+    font-size: 11px;
+    min-height: 8px;
+    max-height: 8px;
+}
+
+QProgressBar::chunk {
+    border-radius: 4px;
+}
+
+/* ==========================================
+   表格
+   ========================================== */
+
+QTableWidget,
+QTableView {
+    border-radius: 8px;
+    gridline-color: transparent;
+    font-size: 13px;
+}
+
+QTableWidget::item,
+QTableView::item {
+    padding: 8px 12px;
+}
+
+QHeaderView::section {
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+QHeaderView::section:first {
+    border-top-left-radius: 8px;
+}
+
+QHeaderView::section:last {
+    border-top-right-radius: 8px;
+}
+
+/* ==========================================
+   选项卡
+   ========================================== */
+
+QTabWidget::pane {
+    border-radius: 8px;
+    padding: 8px;
+}
+
+QTabBar::tab {
+    padding: 8px 16px;
+    margin-right: 4px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-size: 13px;
+}
+
+/* ==========================================
+   工具提示
+   ========================================== */
+
+QToolTip {
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+/* ==========================================
+   菜单
+   ========================================== */
+
+QMenu {
+    border-radius: 8px;
+    padding: 6px;
+}
+
+QMenu::item {
+    padding: 8px 24px 8px 12px;
+    border-radius: 6px;
+}
+
+QMenu::separator {
+    height: 1px;
+    margin: 4px 8px;
+}
+
+/* ==========================================
+   分组框
+   ========================================== */
+
+QGroupBox {
+    font-weight: 600;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 0 6px;
+}
+
+/* ==========================================
+   滑块
+   ========================================== */
+
+QSlider::groove:horizontal {
+    height: 6px;
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    width: 16px;
+    height: 16px;
+    margin: -5px 0;
+    border-radius: 8px;
+}
+
+QSlider::groove:vertical {
+    width: 6px;
+    border-radius: 3px;
+}
+
+QSlider::handle:vertical {
+    width: 16px;
+    height: 16px;
+    margin: 0 -5px;
+    border-radius: 8px;
+}
+
+/* ==========================================
+   分割器
+   ========================================== */
+
+QSplitter::handle {
+    width: 2px;
+    height: 2px;
+}
+
+/* ==========================================
+   状态栏
+   ========================================== */
+
+QStatusBar {
+    min-height: 24px;
+}
+
+QStatusBar::item {
+    border: none;
+}
+
+/* ==========================================
+   工具栏
+   ========================================== */
+
+QToolBar {
+    spacing: 4px;
+    padding: 4px;
+}
+
+QToolButton {
+    padding: 6px;
+    border-radius: 6px;
+}

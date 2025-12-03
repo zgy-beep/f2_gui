@@ -154,3 +154,11 @@ Download/
 # secret
 .pypirc
 f2-secrets
+
+
+# gui
+f2_gui_secrets
+.history/
+.pylintrc
+download_history.json
+gui_config.json

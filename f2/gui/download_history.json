@@ -1,92 +1,97 @@
-[
-  {
-    "user_id": "MS4wLjABAAAA-KY7IvdcV35PAWaOY9giwMQ8s9_Cxy_Do44An0wLbpvl4OeUkChkCELlcyavpw8J",
-    "nickname": "香香宝宝",
-    "first_download_time": "2025-04-28 10:49:12",
-    "last_download_time": "2025-05-06 09:36:52",
-    "download_count": 26,
-    "status": "成功",
-    "last_update_count": 9,
-    "total_update_count": 11
-  },
-  {
-    "user_id": "MS4wLjABAAAAesq_1GB5-WB_gGvWoGCxNrlSUevjXbtD5CxCkxFatGE",
-    "nickname": "忧郁彤少Li",
-    "first_download_time": "2025-04-28 14:51:53",
-    "last_download_time": "2025-05-06 09:38:08",
-    "download_count": 10,
-    "status": "成功",
-    "last_update_count": 122,
-    "total_update_count": 126
-  },
-  {
-    "user_id": "MS4wLjABAAAA6Jxcg86DFBF6TZwVqgaxybCbvYew8burHrg8L3j1ZNAC4BDkJ9tW-l-bkOVgpP9N",
-    "nickname": "宁小萌_",
-    "first_download_time": "2025-04-28 17:09:29",
-    "last_download_time": "2025-05-06 09:39:31",
-    "download_count": 4,
-    "status": "成功",
-    "last_update_count": 3,
-    "total_update_count": 3
-  },
-  {
-    "user_id": "MS4wLjABAAAAgAEL-EK-Zd8S3F8WNaS0EgeHwZ3BVR-fC3UANntQgtw",
-    "nickname": "宸宝",
-    "first_download_time": "2025-04-28 17:52:09",
-    "last_download_time": "2025-05-06 09:39:53",
-    "download_count": 8,
-    "status": "成功",
-    "last_update_count": 5,
-    "total_update_count": 6
-  },
-  {
-    "user_id": "MS4wLjABAAAAvM_gekADJfwm8CGoaV00VTANpeLAgjchkVd9oG8__6c",
-    "nickname": "玺宝",
-    "first_download_time": "2025-04-28 17:57:52",
-    "last_download_time": "2025-05-06 09:43:06",
-    "download_count": 5,
-    "status": "成功",
-    "last_update_count": 2,
-    "total_update_count": 2
-  },
-  {
-    "user_id": "MS4wLjABAAAADZe89ISNuNSnsRi1by_WM-nq4NDHcdOIr8nZ06CfBgA",
-    "nickname": "小小汐汐",
-    "first_download_time": "2025-04-28 18:04:59",
-    "last_download_time": "2025-05-06 09:40:27",
-    "download_count": 8,
-    "status": "成功",
-    "last_update_count": 6,
-    "total_update_count": 8
-  },
-  {
-    "user_id": "MS4wLjABAAAAIXJj0C67TEABZ3nwJFnTyZ7qqAbXqRZ5ccozM-ges9Y",
-    "nickname": "王子_汐汐",
-    "first_download_time": "2025-04-29 11:58:12",
-    "last_download_time": "2025-05-06 09:47:39",
-    "download_count": 3,
-    "status": "成功",
-    "last_update_count": 6,
-    "total_update_count": 692
-  },
-  {
-    "user_id": "MS4wLjABAAAABwJ9chT-eWnNcHiTjed11ZTy51HsncJrmaSDAvObqVo",
-    "nickname": "宝咪",
-    "first_download_time": "2025-04-29 11:58:12",
-    "last_download_time": "2025-05-06 09:41:28",
-    "download_count": 3,
-    "status": "成功",
-    "last_update_count": 4,
-    "total_update_count": 87
-  },
-  {
-    "user_id": "MS4wLjABAAAATnRNpqIuCoPdxbnBY6OTKzHaAPggDTZoeW9xIU4lRuQ",
-    "nickname": "舞见小芭比",
-    "first_download_time": "2025-04-30 18:22:38",
-    "last_download_time": "2025-05-06 09:44:36",
-    "download_count": 3,
-    "status": "成功",
-    "last_update_count": 3,
-    "total_update_count": 284
-  }
-]
+{
+  "records": [
+    {
+      "id": "23d83362",
+      "time": "2025-12-03 15:27:13",
+      "platform": "douyin",
+      "url": "https://v.douyin.com/4NMpNnpargY/",
+      "type": "视频",
+      "status": "成功",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "萱",
+      "download_count": 5,
+      "user_id": "MS4wLjABAAAAeORRsym_lPAamRuJWlb6zFpsKmlQKB_nTjIG34OYcanLyBy1Wjyl1-kpVexSrl0o"
+    },
+    {
+      "id": "1fc74a2f",
+      "time": "2025-12-03 15:07:08",
+      "platform": "douyin",
+      "url": "https://v.douyin.com/vlqM2yhV1t8/",
+      "type": "视频",
+      "status": "成功",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "小烧鱼_",
+      "download_count": 5,
+      "user_id": "MS4wLjABAAAA99l-SCp3mO3lvSwJXfS_cFOgy6igjaRveBjChSfQab4BngU_icJzluxd5s-XGX6b"
+    },
+    {
+      "id": "1a86a4a7",
+      "time": "2025-12-03 11:32:23",
+      "platform": "douyin",
+      "url": "https://v.douyin.com/2yxtm1ecH74/",
+      "type": "视频",
+      "status": "成功",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "诺宝吖_",
+      "download_count": 4,
+      "user_id": "MS4wLjABAAAAY41pOlsToaV_Y0DGeiudHWqn6Hj2c7LUNJ3grbFyk1F5zhsz2xuwmveBFpUEBNbZ"
+    },
+    {
+      "id": "f1fff920",
+      "time": "2025-12-03 10:10:28",
+      "platform": "douyin",
+      "url": "https://v.douyin.com/5C_oR7vHDUI/",
+      "type": "视频",
+      "status": "成功",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "布罗莉",
+      "download_count": 3,
+      "user_id": "MS4wLjABAAAAJrxLHmx8FZOonekVtpmRLtY4d7Npc_HHcuEj_rc-dWBlBUoMnt2G1rgBaKZ7Elhr",
+      "error": "'int' object has no attribute 'split'"
+    },
+    {
+      "id": "96256249",
+      "time": "2025-12-01 13:55:33",
+      "platform": "douyin",
+      "url": "https://v.douyin.com/7axs7WpDtHs/",
+      "type": "视频",
+      "status": "成功",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "小艺同学",
+      "user_id": "MS4wLjABAAAAdxnNbtb1jIMyHQv8TYoT-skdcpaQNrDRubdu0YFCPm4",
+      "download_count": 4
+    },
+    {
+      "id": "7c6e35b5",
+      "time": "2025-11-28 18:20:20",
+      "platform": "tiktok",
+      "url": "https://www.tiktok.com/@sanami3710",
+      "type": "视频",
+      "status": "失败",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "TikTok - 主页作品",
+      "user_id": "",
+      "download_count": 1,
+      "error": "`fetch_user_profile`请求失败，请更换cookie或稍后再试"
+    },
+    {
+      "id": "ff48016b",
+      "time": "2025-11-28 16:38:11",
+      "platform": "douyin",
+      "url": "https://www.douyin.com/user/MS4wLjABAAAA0W6MrnV7YIYmneCLCypeKVoZj4VDk9amQorNZ8aIVfs?from_tab_name=main&vid=7577344656430937064",
+      "type": "视频",
+      "status": "成功",
+      "file_count": 0,
+      "mode": "post",
+      "nickname": "星狗",
+      "user_id": "MS4wLjABAAAA0W6MrnV7YIYmneCLCypeKVoZj4VDk9amQorNZ8aIVfs",
+      "download_count": 1
+    }
+  ]
+}
