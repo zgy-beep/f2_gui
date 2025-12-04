@@ -737,8 +737,23 @@ class MainWindow(QMainWindow):
             cookies = settings_to_save.pop("cookies")
             self.config_manager.save_secrets(cookies)
 
+        # 保存 Bark 配置到 F2 配置文件
+        if "bark" in settings_to_save:
+            bark_settings = settings_to_save.pop("bark")
+            self._save_bark_config(bark_settings)
+
         self.config_manager.update(settings_to_save)
         self.config_manager.save()
+
+    def _save_bark_config(self, bark_settings: dict):
+        """保存 Bark 配置到 GUI 配置文件"""
+        try:
+            # 保存到 GUI 配置文件
+            self.config_manager.set("bark", bark_settings)
+            self.config_manager.save()
+
+        except Exception as e:
+            print(f"保存 Bark 配置失败: {e}")
 
     def _load_config(self):
         """加载配置"""

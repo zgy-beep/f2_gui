@@ -163,3 +163,6 @@ f2_gui_secrets
 download_history.json
 gui_config.json
 .vscode/
+app.yaml
+conf.yaml
+defaults.yaml

@@ -80,6 +80,7 @@ class SettingsPage(QWidget):
         scroll_layout.addWidget(self._create_time_section())  # 时间设置
         scroll_layout.addWidget(self._create_platform_section())  # 新增平台设置
         scroll_layout.addWidget(self._create_proxy_section())
+        scroll_layout.addWidget(self._create_bark_section())  # Bark 通知设置
         scroll_layout.addWidget(self._create_advanced_section())
 
         scroll_layout.addStretch()
@@ -843,6 +844,94 @@ class SettingsPage(QWidget):
         """代理开关切换"""
         self.proxy_input.setEnabled(checked)
 
+    def _create_bark_section(self) -> QWidget:
+        """创建 Bark 通知设置区块"""
+        card, layout = self._create_section_card(
+            "🔔 Bark 通知", "下载完成推送通知到 iOS 设备", "neutral"
+        )
+
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(10)
+        grid.setVerticalSpacing(8)
+        grid.setColumnMinimumWidth(0, 90)
+
+        # 启用 Bark
+        self.enable_bark_check = QCheckBox("启用 Bark 通知")
+        self.enable_bark_check.toggled.connect(self._on_bark_toggled)
+        self.enable_bark_check.toggled.connect(self._on_setting_changed)
+        install_tooltip(
+            self.enable_bark_check,
+            "下载完成后推送通知到 iOS 设备，需要在 App Store 下载 Bark 应用",
+        )
+        grid.addWidget(self.enable_bark_check, 0, 0, 1, 2)
+
+        # Bark Token
+        token_label = QLabel("Bark Token:")
+        token_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        grid.addWidget(token_label, 1, 0)
+
+        self.bark_token_input = StyledLineEdit(
+            placeholder="从 Bark App 获取的 Token", fixed_height=30, border_radius=6
+        )
+        self.bark_token_input.setEnabled(False)
+        self.bark_token_input.textChanged.connect(self._on_setting_changed)
+        install_tooltip(self.bark_token_input, "打开 Bark App，复制推送 URL 中的 Token")
+        grid.addWidget(self.bark_token_input, 1, 1)
+
+        # Bark Key (加密密钥)
+        key_label = QLabel("加密密钥:")
+        key_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        grid.addWidget(key_label, 2, 0)
+
+        self.bark_key_input = StyledLineEdit(
+            placeholder="可选，用于加密推送内容", fixed_height=30, border_radius=6
+        )
+        self.bark_key_input.setEnabled(False)
+        self.bark_key_input.textChanged.connect(self._on_setting_changed)
+        install_tooltip(self.bark_key_input, "在 Bark App 设置中配置的加密密钥（可选）")
+        grid.addWidget(self.bark_key_input, 2, 1)
+
+        # 提示信息
+        hint_label = QLabel("💡 需要在 App Store 下载 Bark 应用，并获取推送 Token")
+        hint_label.setStyleSheet("color: #6B7280; font-size: 11px; margin-top: 4px;")
+        hint_label.setWordWrap(True)
+        grid.addWidget(hint_label, 3, 0, 1, 2)
+
+        layout.addLayout(grid)
+
+        # 尝试加载当前 Bark 配置
+        self._load_bark_config()
+
+        return card
+
+    def _on_bark_toggled(self, checked: bool):
+        """Bark 开关切换"""
+        self.bark_token_input.setEnabled(checked)
+        self.bark_key_input.setEnabled(checked)
+
+    def _load_bark_config(self):
+        """从 GUI 配置加载 Bark 设置"""
+        try:
+            from f2.gui.utils.config_manager import ConfigManager
+
+            config_manager = ConfigManager()
+            bark_conf = config_manager.get("bark") or {}
+
+            # 设置启用状态
+            enable_bark = bark_conf.get("enabled", False)
+            self.enable_bark_check.setChecked(enable_bark)
+
+            # 设置 Token 和 Key
+            self.bark_token_input.setText(bark_conf.get("token", ""))
+            self.bark_key_input.setText(bark_conf.get("key", ""))
+
+        except Exception as e:
+            print(f"加载 Bark 配置失败: {e}")
+
     def _create_advanced_section(self) -> QWidget:
         """创建高级设置区块"""
         card, layout = self._create_section_card(
@@ -987,6 +1076,11 @@ class SettingsPage(QWidget):
             "proxy": {
                 "enabled": self.enable_proxy_check.isChecked(),
                 "address": self.proxy_input.text(),
+            },
+            "bark": {
+                "enabled": self.enable_bark_check.isChecked(),
+                "token": self.bark_token_input.text(),
+                "key": self.bark_key_input.text(),
             },
             "cookies": cookies,
             "advanced": {

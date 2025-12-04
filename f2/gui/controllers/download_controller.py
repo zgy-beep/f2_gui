@@ -351,6 +351,20 @@ class DownloadWorker(QObject):
             kwargs["headers"]["Referer"] = ClientConfManager.referer()
             if "proxies" not in kwargs:
                 kwargs["proxies"] = ClientConfManager.proxies()
+        elif self.platform == "weibo":
+            from f2.apps.weibo.utils import ClientConfManager
+
+            kwargs["headers"]["User-Agent"] = ClientConfManager.user_agent()
+            kwargs["headers"]["Referer"] = ClientConfManager.referer()
+            if "proxies" not in kwargs:
+                kwargs["proxies"] = ClientConfManager.proxies()
+        elif self.platform == "twitter":
+            from f2.apps.twitter.utils import ClientConfManager
+
+            kwargs["headers"]["User-Agent"] = ClientConfManager.user_agent()
+            kwargs["headers"]["Referer"] = ClientConfManager.referer()
+            if "proxies" not in kwargs:
+                kwargs["proxies"] = ClientConfManager.proxies()
 
         return kwargs
 
