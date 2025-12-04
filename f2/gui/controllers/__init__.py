@@ -6,6 +6,5 @@
 """
 
 from .download_controller import DownloadController
-from .task_manager import TaskManager
 
-__all__ = ["DownloadController", "TaskManager"]
+__all__ = ["DownloadController"]

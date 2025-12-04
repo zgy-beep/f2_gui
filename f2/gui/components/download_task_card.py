@@ -452,7 +452,3 @@ class DownloadTaskCard(BaseCard):
     def get_title(self) -> str:
         """获取标题"""
         return self._title
-
-    def get_title(self) -> str:
-        """获取标题"""
-        return self._title

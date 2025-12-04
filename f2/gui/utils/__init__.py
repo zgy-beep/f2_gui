@@ -6,7 +6,6 @@
 """
 
 from .config_manager import ConfigManager
-from .logger import GUILogger
 from .history_manager import HistoryManager, history_manager
 
-__all__ = ["ConfigManager", "GUILogger", "HistoryManager", "history_manager"]
+__all__ = ["ConfigManager", "HistoryManager", "history_manager"]

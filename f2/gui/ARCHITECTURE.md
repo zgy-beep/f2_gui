@@ -19,7 +19,6 @@ GUI v02 采用经典的 MVC (Model-View-Controller) 架构:
 ┌─────────────────────────────────────────────┐
 │          Controllers (控制器层)              │
 │  - DownloadController: 下载控制              │
-│  - TaskManager: 任务管理                     │
 └──────────────┬──────────────────────────────┘
                │
                │ 数据交互
@@ -56,14 +55,13 @@ GUI v02 采用经典的 MVC (Model-View-Controller) 架构:
 业务逻辑处理和 F2 API 交互:
 
 - **DownloadController**: 管理下载任务的生命周期
-- **TaskManager**: 任务状态和队列管理
 
 #### 4. Utils (工具层)
 
 辅助工具类:
 
 - **ConfigManager**: 配置文件的读写
-- **GUILogger**: 日志管理和显示
+- **HistoryManager**: 下载历史记录管理
 
 #### 5. Themes (主题层)
 
@@ -120,9 +118,11 @@ ConfigManager.save()
 ### 主要信号
 
 #### ThemeManager
+
 - `theme_changed(str)`: 主题改变时发出
 
 #### DownloadController
+
 - `task_added(str)`: 任务添加
 - `task_removed(str)`: 任务移除
 - `task_progress(str, int, int)`: 进度更新
@@ -130,6 +130,7 @@ ConfigManager.save()
 - `task_error(str, str)`: 任务错误
 
 #### DownloadTaskCard
+
 - `cancel_requested()`: 取消请求
 - `pause_requested()`: 暂停请求
 - `resume_requested()`: 继续请求
@@ -144,10 +145,10 @@ async def _download(self):
     """执行下载"""
     if self.platform == "douyin":
         from f2.apps.douyin.handler import DouyinHandler
-        
+      
         # 创建处理器
         handler = DouyinHandler()
-        
+      
         # 根据模式调用不同方法
         if self.mode == "post":
             await handler.fetch_user_post_videos(
@@ -205,16 +206,6 @@ for task in visible_tasks:
     self.tasks_layout.addWidget(card)
 ```
 
-### 3. 日志限制
-
-限制日志条目数量,避免内存溢出:
-
-```python
-class GUILogger:
-    def __init__(self, max_messages: int = 1000):
-        self.max_messages = max_messages
-```
-
 ## 测试
 
 ### 单元测试
@@ -229,19 +220,20 @@ pytest --cov=f2.gui_v02 tests/gui_v02/
 
 ### 手动测试清单
 
-- [ ] 主题切换功能
-- [ ] 新建下载任务
-- [ ] 暂停/继续/取消下载
-- [ ] 设置保存和加载
-- [ ] 多任务并发下载
-- [ ] 错误处理
-- [ ] 日志显示
+- [ ]  主题切换功能
+- [ ]  新建下载任务
+- [ ]  暂停/继续/取消下载
+- [ ]  设置保存和加载
+- [ ]  多任务并发下载
+- [ ]  错误处理
+- [ ]  日志显示
 
 ## 常见问题
 
 ### Q: 如何添加新的下载平台?
 
-A: 
+A:
+
 1. 在 `config.py` 添加平台配置
 2. 在 `DownloadController` 中添加对应的处理逻辑
 3. 调用 F2 相应的 Handler
@@ -254,14 +246,5 @@ A: 编辑 `config.py` 中的 `COLORS` 字典
 
 A: 通过 `DownloadWorker` 的信号机制,实时发送进度
 
-## 未来规划
-
-1. **更多平台支持**: 添加 YouTube、Instagram 等
-2. **插件系统**: 允许第三方扩展
-3. **云同步**: 配置和历史记录云同步
-4. **移动端**: 开发移动端应用
-5. **Web 版本**: 提供 Web 界面
-
----
 
 最后更新: 2025-11-27

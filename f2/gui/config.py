@@ -3,6 +3,13 @@
 # @Author       : ZGY
 # @Date         : 2025-12-01 13:43:20
 # @FilePath     : /f2_gui/f2/gui/config.py
+# @LastEditTime : 2025-12-04 11:04:34
+
+# -*- coding:utf-8 -*-
+# @Information  :
+# @Author       : ZGY
+# @Date         : 2025-12-01 13:43:20
+# @FilePath     : /f2_gui/f2/gui/config.py
 # @LastEditTime : 2025-12-02 21:33:27
 
 """
@@ -211,6 +218,7 @@ class Config:
     """配置管理类"""
 
     _instance = None
+    _initialized = False
 
     def __new__(cls):
         if cls._instance is None:
