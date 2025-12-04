@@ -3,6 +3,13 @@
 # @Author       : ZGY
 # @Date         : 2025-12-01 13:43:20
 # @FilePath     : /f2_gui/f2/gui/components/download_task_card.py
+# @LastEditTime : 2025-12-04 09:32:47
+
+# -*- coding:utf-8 -*-
+# @Information  :
+# @Author       : ZGY
+# @Date         : 2025-12-01 13:43:20
+# @FilePath     : /f2_gui/f2/gui/components/download_task_card.py
 # @LastEditTime : 2025-12-03 11:49:32
 
 """
@@ -282,7 +289,7 @@ class DownloadTaskCard(BaseCard):
         self.layout.addLayout(bottom_layout)
 
         # 设置卡片 tooltip 显示 URL
-        install_tooltip(self, f"链接: {self._url}")
+        # install_tooltip(self, f"链接: {self._url}")
 
     def _on_delete_clicked(self):
         """删除按钮点击"""
@@ -441,6 +448,10 @@ class DownloadTaskCard(BaseCard):
         """更新URL (存储到 tooltip)"""
         self._url = url
         install_tooltip(self, f"链接: {url}")
+
+    def get_title(self) -> str:
+        """获取标题"""
+        return self._title
 
     def get_title(self) -> str:
         """获取标题"""

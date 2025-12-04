@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
 
 from f2.gui.components.collapsible_card import CollapsibleCard
 from f2.gui.config import APP_NAME, APP_VERSION, ASSETS_DIR
+from f2.gui.version import get_changelog, get_latest_changes
 
 
 class AboutPage(QWidget):
@@ -48,6 +49,9 @@ class AboutPage(QWidget):
 
         # 顶部 Logo 和应用信息
         scroll_layout.addWidget(self._create_header_section())
+
+        # 版本更新记录
+        scroll_layout.addWidget(self._create_changelog_section())
 
         # 功能特性
         scroll_layout.addWidget(self._create_features_section())
@@ -158,6 +162,108 @@ class AboutPage(QWidget):
 
         content_layout.addWidget(center_widget)
         return card
+
+    def _create_changelog_section(self) -> QWidget:
+        """创建版本更新记录区域"""
+        latest = get_latest_changes()
+        changelog = get_changelog()
+
+        card = CollapsibleCard(
+            title=f"更新日志 v{APP_VERSION}",
+            icon="📋",
+            subtitle=latest.get("日期", ""),
+            collapsed_by_default=False,
+            card_id="about_changelog",
+        )
+        # 添加折叠时显示的标签
+        changes_count = len(latest.get("更新内容", []))
+        card.add_collapsed_tag(text=f"{changes_count} 项更新", tag_type="info")
+
+        content_layout = card.get_content_layout()
+        content_layout.setSpacing(12)
+
+        # 当前版本更新内容
+        current_section = QWidget()
+        current_layout = QVBoxLayout(current_section)
+        current_layout.setContentsMargins(0, 0, 0, 0)
+        current_layout.setSpacing(6)
+
+        for change in latest.get("更新内容", []):
+            change_label = QLabel(f"• {change}")
+            change_label.setWordWrap(True)
+            change_label.setStyleSheet("font-size: 12px; padding: 2px 0;")
+            current_layout.addWidget(change_label)
+
+        content_layout.addWidget(current_section)
+
+        # 历史版本（折叠显示）
+        if len(changelog) > 1:
+            # 分隔线
+            separator = QFrame()
+            separator.setFrameShape(QFrame.Shape.HLine)
+            separator.setStyleSheet("background: rgba(128, 128, 128, 0.2);")
+            separator.setFixedHeight(1)
+            content_layout.addWidget(separator)
+
+            # 历史版本标题
+            history_title = QLabel("历史版本")
+            history_title.setStyleSheet(
+                "font-size: 11px; font-weight: 600; color: #6B7280; margin-top: 4px;"
+            )
+            content_layout.addWidget(history_title)
+
+            # 历史版本内容（只显示最近3个旧版本）
+            versions = list(changelog.keys())
+            for version in versions[1:4]:  # 跳过当前版本，最多显示3个
+                version_data = changelog[version]
+                version_widget = self._create_version_item(version, version_data)
+                content_layout.addWidget(version_widget)
+
+        return card
+
+    def _create_version_item(self, version: str, data: dict) -> QWidget:
+        """创建单个版本更新项"""
+        widget = QFrame()
+        widget.setStyleSheet(
+            """
+            QFrame {
+                background: rgba(128, 128, 128, 0.05);
+                border-radius: 6px;
+                padding: 8px;
+            }
+        """
+        )
+
+        layout = QVBoxLayout(widget)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(4)
+
+        # 版本号和日期
+        header = QHBoxLayout()
+        version_label = QLabel(f"v{version}")
+        version_label.setStyleSheet(
+            "font-size: 11px; font-weight: 600; color: #4F46E5;"
+        )
+        header.addWidget(version_label)
+
+        date_label = QLabel(data.get("日期", ""))
+        date_label.setStyleSheet("font-size: 10px; color: #9CA3AF;")
+        header.addWidget(date_label)
+        header.addStretch()
+        layout.addLayout(header)
+
+        # 更新内容（简化显示）
+        changes = data.get("更新内容", [])
+        if changes:
+            changes_text = " · ".join(changes[:3])  # 最多显示3项
+            if len(changes) > 3:
+                changes_text += f" 等 {len(changes)} 项"
+            changes_label = QLabel(changes_text)
+            changes_label.setStyleSheet("font-size: 10px; color: #6B7280;")
+            changes_label.setWordWrap(True)
+            layout.addWidget(changes_label)
+
+        return widget
 
     def _create_features_section(self) -> QWidget:
         """创建功能特性区域（使用可折叠卡片）"""

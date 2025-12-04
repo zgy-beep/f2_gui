@@ -16,9 +16,11 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
+from f2.gui.version import get_version
+
 # 应用配置
 APP_NAME = "F2 下载工具"
-APP_VERSION = "0.2.0"
+APP_VERSION = get_version()
 ORGANIZATION_NAME = "F2"
 ORGANIZATION_DOMAIN = "f2.wiki"
 

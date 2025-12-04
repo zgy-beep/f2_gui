@@ -9,8 +9,8 @@ import json
 import os
 import uuid
 from datetime import datetime
-from typing import List, Dict, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 
 
 class HistoryManager:
@@ -50,12 +50,12 @@ class HistoryManager:
     def _find_duplicate(self, platform: str, user_id: str, url: str) -> Optional[Dict]:
         """
         查找重复记录（基于 user_id 或 URL）
-        
+
         Args:
             platform: 平台名称
             user_id: 用户ID
             url: 下载链接
-            
+
         Returns:
             找到的重复记录，如果没有则返回 None
         """
@@ -79,7 +79,7 @@ class HistoryManager:
         file_count: int = 0,
         mode: str = "one",
         nickname: str = "",
-        **kwargs
+        **kwargs,
     ) -> str:
         """
         添加历史记录（自动去重，相同用户只保留一条记录）
@@ -98,10 +98,10 @@ class HistoryManager:
             记录ID
         """
         user_id = kwargs.get("user_id", "")
-        
+
         # 查找重复记录
         existing = self._find_duplicate(platform, user_id, url)
-        
+
         if existing:
             # 更新现有记录而不是创建新记录
             existing["time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -109,17 +109,19 @@ class HistoryManager:
             existing["file_count"] = file_count
             existing["nickname"] = nickname
             existing["url"] = url  # 更新 URL（可能从短链变成了长链）
-            existing["download_count"] = existing.get("download_count", 1) + 1
+            # 只有下载成功时才增加下载次数
+            if status == "成功":
+                existing["download_count"] = existing.get("download_count", 1) + 1
             # 更新其他字段
             for key, value in kwargs.items():
                 existing[key] = value
-            
+
             # 将更新后的记录移到最前面
             self._records.remove(existing)
             self._records.insert(0, existing)
             self._save()
             return existing["id"]
-        
+
         # 创建新记录
         record_id = str(uuid.uuid4())[:8]
         record = {
@@ -133,7 +135,7 @@ class HistoryManager:
             "mode": mode,
             "nickname": nickname,
             "download_count": 1,
-            **kwargs
+            **kwargs,
         }
         self._records.insert(0, record)  # 新记录在前面
 
@@ -204,7 +206,7 @@ class HistoryManager:
             "success": success,
             "failed": failed,
             "in_progress": in_progress,
-            "by_platform": platform_stats
+            "by_platform": platform_stats,
         }
 
 
