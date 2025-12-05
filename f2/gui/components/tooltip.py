@@ -79,14 +79,39 @@ class FloatingTooltip(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        # 设置删除时自动清理
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
-        # 连接主题信号
+        # 连接主题信号 - 使用安全的方式
+        self._theme_connection = None
         try:
             from f2.gui.themes.theme_manager import ThemeManager
 
-            ThemeManager().theme_changed.connect(lambda _: self.update())
+            self._theme_manager = ThemeManager()
+            self._theme_connection = self._theme_manager.theme_changed.connect(
+                self._on_theme_changed
+            )
         except Exception:
             pass
+
+    def _on_theme_changed(self, _):
+        """主题变化回调 - 安全检查"""
+        try:
+            if not self.isVisible():
+                return
+            self.update()
+        except RuntimeError:
+            # 对象已被删除
+            pass
+
+    def closeEvent(self, event):
+        """关闭事件 - 断开主题信号连接"""
+        try:
+            if self._theme_connection and hasattr(self, "_theme_manager"):
+                self._theme_manager.theme_changed.disconnect(self._on_theme_changed)
+        except (RuntimeError, TypeError):
+            pass
+        super().closeEvent(event)
 
     def _setup_ui(self):
         """设置 UI"""

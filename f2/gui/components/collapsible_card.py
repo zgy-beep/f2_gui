@@ -160,7 +160,6 @@ class CollapsibleCard(QFrame):
         super().__init__(parent)
         self._title = title
         self._icon = icon
-        self._subtitle = subtitle
         self._show_toggle_button = show_toggle_button
         self._card_id = card_id or self._generate_card_id(title)
         self._save_state = save_state
@@ -179,6 +178,9 @@ class CollapsibleCard(QFrame):
         self._setup_base_ui()
         self._apply_style()
         self._connect_theme_signal()
+
+        if subtitle:
+            self.add_subtitle(subtitle)
 
     def _connect_theme_signal(self):
         """连接主题变化信号"""
@@ -269,14 +271,7 @@ class CollapsibleCard(QFrame):
             """
             )
 
-        if hasattr(self, "_subtitle_label"):
-            self._subtitle_label.setStyleSheet(
-                f"""
-                color: {styles['subtitle_color']};
-                font-size: 11px;
-                background: transparent;
-            """
-            )
+
 
         if hasattr(self, "_hint_label"):
             self._hint_label.setStyleSheet(
@@ -317,16 +312,14 @@ class CollapsibleCard(QFrame):
         )
         layout.addWidget(self._title_label)
 
-        # 副标题/摘要（折叠时显示更多信息）
-        self._subtitle_label = QLabel(self._subtitle)
-        self._subtitle_label.setStyleSheet(
-            f"""
-            color: {styles['subtitle_color']};
-            font-size: 11px;
-            background: transparent;
-        """
-        )
-        layout.addWidget(self._subtitle_label)
+        # 副标题容器
+        self._subtitles_container = QWidget()
+        self._subtitles_container.setStyleSheet("background: transparent;")
+        self._subtitles_layout = QHBoxLayout(self._subtitles_container)
+        self._subtitles_layout.setContentsMargins(0, 0, 0, 0)
+        self._subtitles_layout.setSpacing(6)
+        self._subtitles_container.setVisible(False)  # 默认隐藏
+        layout.addWidget(self._subtitles_container)
 
         # 折叠状态指示器
         self._collapsed_info = QWidget()
@@ -432,10 +425,49 @@ class CollapsibleCard(QFrame):
         self._title = title
         self._title_label.setText(title)
 
-    def set_subtitle(self, subtitle: str):
-        """设置副标题"""
-        self._subtitle = subtitle
-        self._subtitle_label.setText(subtitle)
+    def add_subtitle(
+        self, text: str, icon: str = "", tag_type: str = "info"
+    ) -> TagLabel:
+        """添加一个卡片样式的副标题.
+
+        Args:
+            text (str): 副标题文本.
+            icon (str, optional): 图标. Defaults to "".
+            tag_type (str, optional): 标签类型. Defaults to "info".
+
+        Returns:
+            TagLabel: 创建的标签实例.
+        """
+        if not hasattr(self, "_subtitles_container"):
+            return
+
+        subtitle_tag = TagLabel(
+            text=text,
+            icon=icon,
+            tag_type=tag_type,
+            padding="4px 8px",
+            border_radius=5,
+        )
+        self._subtitles_layout.addWidget(subtitle_tag)
+
+        if not self._subtitles_container.isVisible():
+            self._subtitles_container.setVisible(True)
+
+        return subtitle_tag
+
+    def clear_subtitles(self):
+        """清除所有副标题."""
+        if not hasattr(self, "_subtitles_layout"):
+            return
+
+        while self._subtitles_layout.count():
+            item = self._subtitles_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
+        if hasattr(self, "_subtitles_container"):
+            self._subtitles_container.setVisible(False)
 
     def set_icon(self, icon: str):
         """设置图标"""

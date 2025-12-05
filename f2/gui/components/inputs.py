@@ -209,7 +209,7 @@ class UrlLineEdit(StyledLineEdit):
 
 
 class BatchTextEdit(StyledTextEdit):
-    """批量输入框 - 预设样式"""
+    """批量输入框 - 预设样式，粘贴时只保留纯文本"""
 
     def __init__(self, parent=None, placeholder: str = "每行一个链接..."):
         super().__init__(
@@ -218,6 +218,15 @@ class BatchTextEdit(StyledTextEdit):
             min_height=80,
             border_radius=8,
         )
+        # 设置只接受纯文本
+        self.setAcceptRichText(False)
+
+    def insertFromMimeData(self, source):
+        """重写粘贴方法，只粘贴纯文本"""
+        if source.hasText():
+            self.insertPlainText(source.text())
+        else:
+            super().insertFromMimeData(source)
 
 
 class SearchLineEdit(StyledLineEdit):

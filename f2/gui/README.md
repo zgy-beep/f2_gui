@@ -1,49 +1,59 @@
-# F2 GUI v02
+# F2 GUI v0.2
 
 > 现代化的 F2 下载工具图形用户界面
 
 ## ✨ 特性
 
-- 🌗 **亮色/暗色主题** - 支持主题切换,保护您的眼睛
-- 📦 **卡片式布局** - 现代化的卡片布局,信息展示更清晰
-- 🔄 **异步下载** - 基于 F2 的异步架构,高效稳定
-- 🌐 **多平台支持** - 支持抖音、TikTok、微博、Twitter 等平台
+- 🌗 **亮色/暗色主题** - 支持主题切换，自动保存偏好
+- 📦 **卡片式布局** - 现代化的卡片布局，信息展示更清晰
+- 🔄 **异步下载** - 基于 F2 的异步架构，高效稳定
+- 🌐 **多平台支持** - 支持抖音、TikTok、微博、Twitter/X 等平台
 - 📊 **实时统计** - 实时显示下载进度和统计信息
-- ⚙️ **灵活配置** - 丰富的配置选项,满足不同需求
-- 🔌 **模块化架构** - 清晰的代码结构,易于维护和扩展
+- 📜 **下载历史** - 完整的下载历史记录管理
+- ⚙️ **灵活配置** - 丰富的配置选项，满足不同需求
+- 🔔 **Bark 通知** - 支持 iOS Bark 推送通知
+- 🔌 **模块化架构** - 清晰的代码结构，易于维护和扩展
 
 ## 🏗️ 项目结构
 
 ```
 gui/
-├── __init__.py          # 包初始化
-├── __main__.py          # 程序入口
-├── config.py            # 配置管理
-├── components/          # UI组件
-│   ├── base_card.py     # 基础卡片组件
-│   ├── stat_card.py     # 统计卡片
-│   └── download_task_card.py  # 下载任务卡片
-├── controllers/         # 控制器层
-│   ├── download_controller.py  # 下载控制器
-│   └── task_manager.py         # 任务管理器
-├── models/              # 数据模型
-├── views/               # 视图层
-│   ├── main_window.py   # 主窗口
-│   ├── home_page.py     # 首页
-│   └── settings_page.py # 设置页面
-├── utils/               # 工具类
-│   ├── config_manager.py  # 配置管理器
-│   └── logger.py          # 日志管理器
-├── themes/              # 主题系统
-│   └── theme_manager.py   # 主题管理器
-└── assets/              # 资源文件
+├── __init__.py           # 包初始化
+├── __main__.py           # 程序入口
+├── config.py             # 全局配置和常量
+├── version.py            # 版本管理和更新日志
+├── components/           # UI组件
+│   ├── base_card.py      # 基础卡片组件
+│   ├── buttons.py        # 按钮组件
+│   ├── collapsible_card.py  # 可折叠卡片
+│   ├── download_task_card.py  # 下载任务卡片
+│   ├── stats_card.py     # 统计卡片
+│   ├── tooltip.py        # 工具提示和 Toast 通知
+│   └── ...
+├── controllers/          # 控制器层
+│   └── download_controller.py  # 下载控制器
+├── views/                # 视图层
+│   ├── main_window.py    # 主窗口
+│   ├── home_page.py      # 首页（下载任务）
+│   ├── history_page.py   # 历史记录页
+│   ├── settings_page.py  # 设置页面
+│   └── about_page.py     # 关于页面
+├── utils/                # 工具类
+│   ├── config_manager.py # GUI 配置管理器
+│   └── history_manager.py # 历史记录管理器
+├── themes/               # 主题系统
+│   ├── theme_manager.py  # 主题管理器
+│   └── styles/           # QSS 样式文件
+└── assets/               # 资源文件
+    ├── icon/             # 图标资源
+    └── public/           # 公共资源
 ```
 
 ## 🚀 快速开始
 
 ### 前置要求
 
-- Python 3.11+
+- Python 3.10+
 - PyQt6
 - F2 核心库
 
@@ -54,129 +64,114 @@ gui/
 pip install PyQt6
 
 # 或使用项目的 requirements.txt
-pip install -r requirements.txt
+pip install -r f2/gui/requirements.txt
 ```
 
 ### 运行程序
 
 ```bash
-# 方式1: 直接运行模块
+# 运行 GUI
 python -m f2.gui
-
-# 方式2: 从项目根目录运行
-cd f2
-python -m gui_v02.__main__
 ```
 
 ## 📖 使用指南
 
 ### 新建下载任务
 
-1. 在首页选择要下载的平台(抖音、TikTok等)
-2. 选择下载模式(单个作品、用户主页、点赞列表等)
-3. 输入链接或用户ID
-4. 点击"开始下载"按钮
+1. 在首页选择要下载的平台（抖音、TikTok、微博、Twitter/X）
+2. 选择下载模式（单个作品、用户主页、点赞列表等）
+3. 输入链接或用户主页 URL
+4. 点击"添加到队列"
+5. 点击"开始下载"按钮
 
 ### 配置设置
 
-在设置页面中,您可以配置:
+在设置页面中，您可以配置：
 
-- **下载设置**
-
-  - 下载路径
-  - 文件命名模板
-  - 文件名长度限制
-  - 最大并发数
-  - 最大下载数量
-- **代理设置**
-
-  - 启用/禁用代理
-  - 代理地址配置
-- **高级设置**
-
-  - 日志级别
-  - 超时时间
-  - 重试次数
+- **Cookie 配置** - 各平台的登录 Cookie
+- **下载设置** - 路径、命名、并发数等
+- **代理设置** - HTTP/HTTPS 代理
+- **时间筛选** - 按日期范围筛选作品
+- **Bark 通知** - iOS 推送通知配置
+- **高级设置** - 日志级别、超时时间等
 
 ### 主题切换
 
-点击侧边栏底部的"切换主题"按钮,即可在亮色和暗色主题之间切换。
+点击侧边栏底部的主题切换按钮，即可在亮色和暗色主题之间切换。
 
 ## 🎨 设计理念
 
 ### Material Design 3
 
-GUI 完全遵循 Material Design 3 设计规范:
+GUI 遵循 Material Design 3 设计规范：
 
-- **色彩系统**: 使用 MD3 的动态色彩系统,支持主题色、容器色等
-- **圆角设计**: 统一的 12px 圆角,营造柔和的视觉效果
+- **色彩系统**: 使用 MD3 的动态色彩系统
+- **圆角设计**: 统一的圆角风格
 - **阴影效果**: 适度的阴影增强层次感
-- **动画交互**: 流畅的过渡动画提升用户体验
+- **动画交互**: 流畅的过渡动画
 
 ### 模块化架构
 
-采用 MVC 架构模式:
+采用 MVC 架构模式：
 
-- **Models**: 数据模型定义
-- **Views**: UI界面和页面
-- **Controllers**: 业务逻辑和F2 API交互
-
-## 🔧 开发指南
-
-### 添加新平台
-
-1. 在 `config.py` 的 `PLATFORM_CONFIG` 中添加平台配置
-2. 在 `controllers/download_controller.py` 中实现对应的下载逻辑
-3. 调用相应的 F2 Handler (如 DouyinHandler, TiktokHandler)
-
-### 自定义主题
-
-编辑 `config.py` 中的 `COLORS` 配置:
-
-```python
-COLORS = {
-    "light": {
-        "primary": "#6750A4",
-        "on_primary": "#FFFFFF",
-        # ... 其他颜色
-    },
-    "dark": {
-        "primary": "#D0BCFF",
-        "on_primary": "#381E72",
-        # ... 其他颜色
-    }
-}
-```
-
-### 添加新组件
-
-在 `components/` 目录下创建新组件,继承 `BaseCard`:
-
-```python
-from f2.gui.components.base_card import BaseCard
-
-class MyCustomCard(BaseCard):
-    def __init__(self, parent=None):
-        super().__init__(parent, elevated=True)
-        self._setup_content()
-  
-    def _setup_content(self):
-        # 添加您的组件内容
-        pass
-```
+- **Views**: UI 界面和页面
+- **Controllers**: 业务逻辑和 F2 API 交互
+- **Utils**: 配置管理和工具类
 
 ## 📝 待办事项
 
-- [X]  集成 F2 核心 API
-- [X]  实现下载历史记录
-- [X]  添加下载队列管理
-- [X]  支持批量下载
-- [X]  添加浏览器 Cookie 导入
-- [ ]  支持 微博
-- [ ]  支持 TikTok
-- [ ]  支持 X
-- [X]  添加下载完成通知
-- [ ]  实现自动更新检查
+### 已完成 ✅
+
+- [x] 集成 F2 核心 API
+- [x] 实现下载历史记录
+- [x] 添加下载队列管理
+- [x] 支持批量下载
+- [x] 添加浏览器 Cookie 导入
+- [x] 支持抖音下载
+- [x] Bark 通知配置
+- [x] Toast 风格操作反馈
+- [x] 主题切换和持久化
+- [x] 修复主题切换崩溃问题
+- [x] 清理冗余文件和代码
+
+### 进行中 🚧
+
+- [ ] 支持 TikTok 下载（已集成，待测试优化）
+- [ ] 支持微博下载（已集成，待测试优化）
+- [ ] 支持 Twitter/X 下载（已集成，待测试优化）
+- [ ] 任务暂停/恢复功能优化
+
+### 计划中 📋
+
+- [ ] 实现自动更新检查
+- [ ] 添加下载完成系统通知
+- [ ] 支持更多平台（YouTube、Instagram 等）
+- [ ] 下载速度限制
+- [ ] 定时下载任务
+- [ ] 多语言支持
+
+## 📊 进度条显示说明
+
+由于 F2 核心库的 handler 方法不暴露下载进度回调，GUI 对不同模式采用不同的进度显示策略：
+
+### 实时进度（百分比显示）
+
+- **抖音用户主页作品** (`post` 模式) - 显示 `0%` → `100%` 的实际进度
+
+### 不确定进度（脉冲动画）
+
+以下模式显示"处理中..."脉冲动画，完成后变为 100%：
+
+- 单个作品下载 (`one`)
+- 点赞列表 (`like`)
+- 收藏列表 (`collect`/`collection`)
+- 合集 (`mix`)
+- 音乐收藏 (`music`)
+- 直播 (`live`)
+- TikTok、微博、Twitter 所有模式
+
+> **注意**: 这是 F2 核心架构的限制，未来如果 F2 核心支持进度回调，GUI 会相应更新。
+- [ ] 配置导入/导出
 
 ## 📄 许可证
 
@@ -195,4 +190,5 @@ class MyCustomCard(BaseCard):
 
 ---
 
-**注意**: GUI  仍在开发中,部分功能可能尚未完全实现。欢迎提交 Issue 和 PR!
+**当前版本**: v0.2.1 | **更新日期**: 2025-12-04
+

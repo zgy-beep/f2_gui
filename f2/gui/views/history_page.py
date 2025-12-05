@@ -28,7 +28,13 @@ from PyQt6.QtWidgets import (
 from f2.gui.components.buttons import DangerButton, PrimaryButton, SecondaryButton
 from f2.gui.components.collapsible_card import CollapsibleCard
 from f2.gui.components.combobox import PlatformComboBox, SortComboBox
-from f2.gui.components.labels import CountBadge, ModeLabel, PlatformLabel, TagLabel
+from f2.gui.components.labels import (
+    CardTextLabel,
+    CountBadge,
+    ModeLabel,
+    PlatformLabel,
+    TagLabel,
+)
 from f2.gui.components.separator import GradientSeparator
 from f2.gui.components.stats_card import HorizontalStatsCard
 from f2.gui.components.tooltip import install_tooltip, show_click_tooltip
@@ -107,40 +113,45 @@ class UserHistoryCard(CompactUserCard):
 
         # === 右侧统计和操作区域 ===
         stats_layout = QHBoxLayout()
-        stats_layout.setSpacing(8)
+        stats_layout.setSpacing(6)
 
-        # 下载次数徽章 - 使用 CountBadge 基类
+        # 下载次数 - 使用卡片式文本组件
         download_count = self.user_data.get("download_count", 0)
-        count_badge = CountBadge(
-            count=download_count,
-            suffix="次",
-            parent=self,
-            tag_type="info",
+        count_card = CardTextLabel(
+            label="下载",
+            value=f"{download_count}次",
             icon="📥",
+            card_type="info",
+            padding="4px 8px",
+            border_radius=6,
         )
-        stats_layout.addWidget(count_badge)
+        stats_layout.addWidget(count_card)
 
-        # 成功状态徽章 - 使用 CountBadge 基类
+        # 成功状态 - 使用卡片式文本组件
         success_count = self.user_data.get("success_count", 0)
         if success_count > 0:
-            success_badge = CountBadge(
-                count=success_count,
-                parent=self,
-                tag_type="success",
+            success_card = CardTextLabel(
+                label="成功",
+                value=str(success_count),
                 icon="✅",
+                card_type="success",
+                padding="4px 8px",
+                border_radius=6,
             )
-            stats_layout.addWidget(success_badge)
+            stats_layout.addWidget(success_card)
 
-        # 失败状态徽章 - 使用 CountBadge 基类
+        # 失败状态 - 使用卡片式文本组件
         fail_count = self.user_data.get("fail_count", 0)
         if fail_count > 0:
-            fail_badge = CountBadge(
-                count=fail_count,
-                parent=self,
-                tag_type="error",
+            fail_card = CardTextLabel(
+                label="失败",
+                value=str(fail_count),
                 icon="❌",
+                card_type="error",
+                padding="4px 8px",
+                border_radius=6,
             )
-            stats_layout.addWidget(fail_badge)
+            stats_layout.addWidget(fail_card)
 
         header_layout.addLayout(stats_layout)
 
@@ -815,6 +826,16 @@ class HistoryPage(QWidget):
         self.stats_card.set_stat_value("downloads", str(total_downloads))
         self.stats_card.set_stat_value("success", str(success_count))
         self.stats_card.set_stat_value("failed", str(fail_count))
+
+        # 更新折叠标签显示的记录数量
+        if hasattr(self, "_records_count_tag"):
+            self._records_count_tag.setText(f"{total_users} 个用户")
+        # 更新下载历史卡片副标题
+        if hasattr(self, "records_card"):
+            self.records_card.clear_subtitles()
+            if total_users > 0 or total_downloads > 0:
+                self.records_card.add_subtitle(f"{total_users} 个用户", icon="👤")
+                self.records_card.add_subtitle(f"{total_downloads} 条记录", icon="📜")
 
     def _on_search_changed(self, text: str):
         """搜索变化"""

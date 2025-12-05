@@ -13,7 +13,7 @@
 """
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QHBoxLayout, QLabel, QWidget
+from PyQt6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 # ===================== 主题样式定义 =====================
 # 夜间模式
@@ -583,3 +583,394 @@ class TextLabel(QLabel):
             }}
         """
         )
+
+
+class CardTextLabel(QWidget):
+    """卡片模式文本组件 - 带背景的文本显示
+
+    特点:
+    - 卡片式背景（带边框和圆角）
+    - 支持图标 + 标签 + 值的组合
+    - 支持主题切换
+    - 多种预设样式
+    """
+
+    def __init__(
+        self,
+        label: str = "",
+        value: str = "",
+        parent=None,
+        icon: str = "",
+        card_type: str = "default",  # default, info, success, warning, error
+        layout_type: str = "horizontal",  # horizontal, vertical
+        label_width: int = None,
+        padding: str = "8px 12px",
+        border_radius: int = 8,
+        spacing: int = 8,
+    ):
+        super().__init__(parent)
+
+        self._label = label
+        self._value = value
+        self._icon = icon
+        self._card_type = card_type
+        self._layout_type = layout_type
+        self._label_width = label_width
+        self._padding = padding
+        self._border_radius = border_radius
+        self._spacing = spacing
+
+        self._setup_ui()
+        self._apply_style()
+        self._connect_theme_signal()
+
+    def _connect_theme_signal(self):
+        """连接主题变化信号"""
+        try:
+            from f2.gui.themes.theme_manager import ThemeManager
+
+            ThemeManager().theme_changed.connect(self._on_theme_changed)
+        except Exception:
+            pass
+
+    def _on_theme_changed(self, theme: str):
+        """主题变化时更新样式"""
+        self._apply_style()
+
+    def _setup_ui(self):
+        """设置UI"""
+        if self._layout_type == "vertical":
+            layout = QVBoxLayout(self)
+        else:
+            layout = QHBoxLayout(self)
+
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(self._spacing)
+
+        # 图标 + 标签
+        if self._icon or self._label:
+            label_text = f"{self._icon} {self._label}" if self._icon else self._label
+            self._label_widget = QLabel(label_text)
+            self._label_widget.setObjectName("cardLabel")
+            if self._label_width:
+                self._label_widget.setFixedWidth(self._label_width)
+            layout.addWidget(self._label_widget)
+
+        # 值
+        self._value_widget = QLabel(self._value)
+        self._value_widget.setObjectName("cardValue")
+        if self._layout_type == "horizontal":
+            layout.addStretch()
+        layout.addWidget(self._value_widget)
+
+    def _get_card_colors(self, styles: dict) -> tuple:
+        """获取卡片颜色"""
+        type_map = {
+            "default": (
+                "neutral_bg",
+                "neutral_border",
+                "subtitle_color",
+                "title_color",
+            ),
+            "info": ("info_bg", "info_border", "info_text", "title_color"),
+            "success": ("success_bg", "success_border", "success_text", "title_color"),
+            "warning": ("warning_bg", "warning_border", "warning_text", "title_color"),
+            "error": ("error_bg", "error_border", "error_text", "title_color"),
+        }
+
+        bg_key, border_key, label_key, value_key = type_map.get(
+            self._card_type,
+            ("neutral_bg", "neutral_border", "subtitle_color", "title_color"),
+        )
+        return styles[bg_key], styles[border_key], styles[label_key], styles[value_key]
+
+    def _apply_style(self):
+        """应用样式"""
+        styles = _get_styles()
+        bg, border, label_color, value_color = self._get_card_colors(styles)
+
+        self.setStyleSheet(
+            f"""
+            CardTextLabel {{
+                background-color: {bg};
+                border: 1px solid {border};
+                border-radius: {self._border_radius}px;
+                padding: {self._padding};
+            }}
+            QLabel#cardLabel {{
+                color: {label_color};
+                font-size: 12px;
+                font-weight: 500;
+                background: transparent;
+            }}
+            QLabel#cardValue {{
+                color: {value_color};
+                font-size: 13px;
+                font-weight: 600;
+                background: transparent;
+            }}
+        """
+        )
+
+    def set_value(self, value: str):
+        """设置值"""
+        self._value = value
+        self._value_widget.setText(value)
+
+    def set_label(self, label: str):
+        """设置标签"""
+        self._label = label
+        label_text = f"{self._icon} {label}" if self._icon else label
+        self._label_widget.setText(label_text)
+
+    def value(self) -> str:
+        """获取值"""
+        return self._value
+
+
+class KeyValueLabel(QWidget):
+    """键值对标签 - 简洁的标签+值显示
+
+    适用于表单、详情页等场景
+    """
+
+    def __init__(
+        self,
+        key: str = "",
+        value: str = "",
+        parent=None,
+        icon: str = "",
+        key_width: int = 80,
+        spacing: int = 10,
+        key_color: str = None,
+        value_color: str = None,
+    ):
+        super().__init__(parent)
+
+        self._key = key
+        self._value = value
+        self._icon = icon
+        self._key_width = key_width
+        self._spacing = spacing
+        self._custom_key_color = key_color
+        self._custom_value_color = value_color
+
+        self._setup_ui()
+        self._apply_style()
+        self._connect_theme_signal()
+
+    def _connect_theme_signal(self):
+        """连接主题变化信号"""
+        try:
+            from f2.gui.themes.theme_manager import ThemeManager
+
+            ThemeManager().theme_changed.connect(self._on_theme_changed)
+        except Exception:
+            pass
+
+    def _on_theme_changed(self, theme: str):
+        """主题变化时更新样式"""
+        self._apply_style()
+
+    def _setup_ui(self):
+        """设置UI"""
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(self._spacing)
+
+        # 键
+        key_text = f"{self._icon} {self._key}" if self._icon else self._key
+        self._key_widget = QLabel(key_text)
+        self._key_widget.setObjectName("kvKey")
+        self._key_widget.setFixedWidth(self._key_width)
+        layout.addWidget(self._key_widget)
+
+        # 值
+        self._value_widget = QLabel(self._value)
+        self._value_widget.setObjectName("kvValue")
+        layout.addWidget(self._value_widget, 1)
+
+    def _apply_style(self):
+        """应用样式"""
+        styles = _get_styles()
+        key_color = self._custom_key_color or styles["subtitle_color"]
+        value_color = self._custom_value_color or styles["title_color"]
+
+        self.setStyleSheet(
+            f"""
+            KeyValueLabel {{
+                background: transparent;
+            }}
+            QLabel#kvKey {{
+                color: {key_color};
+                font-size: 12px;
+                font-weight: 500;
+                background: transparent;
+            }}
+            QLabel#kvValue {{
+                color: {value_color};
+                font-size: 12px;
+                font-weight: 400;
+                background: transparent;
+            }}
+        """
+        )
+
+    def set_value(self, value: str):
+        """设置值"""
+        self._value = value
+        self._value_widget.setText(value)
+
+    def set_key(self, key: str):
+        """设置键"""
+        self._key = key
+        key_text = f"{self._icon} {key}" if self._icon else key
+        self._key_widget.setText(key_text)
+
+    def value(self) -> str:
+        """获取值"""
+        return self._value
+
+
+class InfoCardLabel(QWidget):
+    """信息卡片标签 - 带图标的信息展示卡片
+
+    适用于显示统计数据、状态信息等
+    """
+
+    def __init__(
+        self,
+        title: str = "",
+        value: str = "",
+        parent=None,
+        icon: str = "",
+        subtitle: str = "",
+        card_type: str = "default",
+        min_width: int = 120,
+    ):
+        super().__init__(parent)
+
+        self._title = title
+        self._value = value
+        self._icon = icon
+        self._subtitle = subtitle
+        self._card_type = card_type
+        self._min_width = min_width
+
+        self.setMinimumWidth(min_width)
+        self._setup_ui()
+        self._apply_style()
+        self._connect_theme_signal()
+
+    def _connect_theme_signal(self):
+        """连接主题变化信号"""
+        try:
+            from f2.gui.themes.theme_manager import ThemeManager
+
+            ThemeManager().theme_changed.connect(self._on_theme_changed)
+        except Exception:
+            pass
+
+    def _on_theme_changed(self, theme: str):
+        """主题变化时更新样式"""
+        self._apply_style()
+
+    def _setup_ui(self):
+        """设置UI"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(12, 10, 12, 10)
+        layout.setSpacing(4)
+
+        # 标题行（图标 + 标题）
+        title_layout = QHBoxLayout()
+        title_layout.setSpacing(6)
+
+        if self._icon:
+            self._icon_widget = QLabel(self._icon)
+            self._icon_widget.setObjectName("infoIcon")
+            title_layout.addWidget(self._icon_widget)
+
+        self._title_widget = QLabel(self._title)
+        self._title_widget.setObjectName("infoTitle")
+        title_layout.addWidget(self._title_widget)
+        title_layout.addStretch()
+
+        layout.addLayout(title_layout)
+
+        # 值
+        self._value_widget = QLabel(self._value)
+        self._value_widget.setObjectName("infoValue")
+        layout.addWidget(self._value_widget)
+
+        # 副标题
+        if self._subtitle:
+            self._subtitle_widget = QLabel(self._subtitle)
+            self._subtitle_widget.setObjectName("infoSubtitle")
+            layout.addWidget(self._subtitle_widget)
+
+    def _get_card_colors(self, styles: dict) -> tuple:
+        """获取卡片颜色"""
+        type_map = {
+            "default": ("neutral_bg", "neutral_border", "subtitle_color"),
+            "info": ("info_bg", "info_border", "info_text"),
+            "success": ("success_bg", "success_border", "success_text"),
+            "warning": ("warning_bg", "warning_border", "warning_text"),
+            "error": ("error_bg", "error_border", "error_text"),
+        }
+
+        bg_key, border_key, accent_key = type_map.get(
+            self._card_type, ("neutral_bg", "neutral_border", "subtitle_color")
+        )
+        return styles[bg_key], styles[border_key], styles[accent_key]
+
+    def _apply_style(self):
+        """应用样式"""
+        styles = _get_styles()
+        bg, border, accent = self._get_card_colors(styles)
+
+        self.setStyleSheet(
+            f"""
+            InfoCardLabel {{
+                background-color: {bg};
+                border: 1px solid {border};
+                border-radius: 10px;
+            }}
+            QLabel#infoIcon {{
+                font-size: 14px;
+                background: transparent;
+            }}
+            QLabel#infoTitle {{
+                color: {styles["subtitle_color"]};
+                font-size: 11px;
+                font-weight: 500;
+                background: transparent;
+            }}
+            QLabel#infoValue {{
+                color: {styles["title_color"]};
+                font-size: 20px;
+                font-weight: 700;
+                background: transparent;
+            }}
+            QLabel#infoSubtitle {{
+                color: {accent};
+                font-size: 10px;
+                font-weight: 400;
+                background: transparent;
+            }}
+        """
+        )
+
+    def set_value(self, value: str):
+        """设置值"""
+        self._value = value
+        self._value_widget.setText(value)
+
+    def set_subtitle(self, subtitle: str):
+        """设置副标题"""
+        self._subtitle = subtitle
+        if hasattr(self, "_subtitle_widget"):
+            self._subtitle_widget.setText(subtitle)
+
+    def value(self) -> str:
+        """获取值"""
+        return self._value

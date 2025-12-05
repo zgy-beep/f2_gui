@@ -9,6 +9,10 @@ PowerShell 启动脚本（中文版）for f2_gui
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# 尝试将 PowerShell 控制台输出编码设置为 UTF-8，避免 conda 打印时出现编码错误
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+
 function Write-Info { param($msg) Write-Host $msg -ForegroundColor Cyan }
 function Write-Warn { param($msg) Write-Host $msg -ForegroundColor Yellow }
 function Write-Err  { param($msg) Write-Host $msg -ForegroundColor Red }
@@ -90,7 +94,10 @@ function Setup-EnvInternal {
 
 function Start-AppInternal {
     Write-Info '尝试使用 conda run 在 f2_gui 环境中启动程序...'
-    & conda run -n f2_gui python -m f2.gui
+    # 设置 Python 使用 UTF-8 模式并禁用 conda 对子进程输出的捕获，
+    # 避免 conda 在打印捕获输出时因控制台编码为 GBK 导致 UnicodeEncodeError
+    $env:PYTHONUTF8 = '1'
+    & conda run -n f2_gui --no-capture-output python -u -m f2.gui
     if ($LASTEXITCODE -ne 0) {
         Write-Err "错误：程序启动失败，退出代码 $LASTEXITCODE"
         return $false
@@ -118,7 +125,8 @@ while ($true) {
     switch ($choice) {
         '1' {
             if (-not (Check-Conda)) { break }
-            Start-AppInternal | Out-Null
+            # 直接调用 Start-AppInternal，避免使用 Out-Null 丢弃输出
+            Start-AppInternal
             break
         }
         '2' {

@@ -152,16 +152,6 @@ class StatsCard(CollapsibleCard):
             """
             )
 
-        # 更新副标题颜色
-        if hasattr(self, "_subtitle_label"):
-            self._subtitle_label.setStyleSheet(
-                f"""
-                color: {styles['subtitle_color']};
-                font-size: 11px;
-                background: transparent;
-            """
-            )
-
         # 更新提示标签颜色
         if hasattr(self, "_hint_label"):
             self._hint_label.setStyleSheet(

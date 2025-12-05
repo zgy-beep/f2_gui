@@ -5,13 +5,6 @@
 # @FilePath     : /f2_gui/f2/gui/config.py
 # @LastEditTime : 2025-12-04 11:04:34
 
-# -*- coding:utf-8 -*-
-# @Information  :
-# @Author       : ZGY
-# @Date         : 2025-12-01 13:43:20
-# @FilePath     : /f2_gui/f2/gui/config.py
-# @LastEditTime : 2025-12-02 21:33:27
-
 """
 GUI配置管理模块
 ~~~~~~~~~~~~~~
@@ -19,9 +12,7 @@ GUI配置管理模块
 管理GUI应用的全局配置、默认值和常量。
 """
 
-import os
 from pathlib import Path
-from typing import Any, Dict
 
 from f2.gui.version import get_version
 
@@ -212,64 +203,3 @@ COLORS = {
         "inverse_primary": "#5E6AD2",
     },
 }
-
-
-class Config:
-    """配置管理类"""
-
-    _instance = None
-    _initialized = False
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-
-    def __init__(self):
-        if self._initialized:
-            return
-        self._config: Dict[str, Any] = {}
-        self._load_config()
-        self._initialized = True
-
-    def _load_config(self):
-        """加载配置"""
-        # 这里可以从文件加载配置
-        # 暂时使用默认配置
-        self._config = {
-            "theme": DEFAULT_THEME,
-            "window_size": (DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT),
-            "download": DEFAULT_DOWNLOAD_CONFIG.copy(),
-            "log_level": DEFAULT_LOG_LEVEL,
-        }
-
-    def get(self, key: str, default: Any = None) -> Any:
-        """获取配置值"""
-        keys = key.split(".")
-        value = self._config
-        for k in keys:
-            if isinstance(value, dict):
-                value = value.get(k, default)
-            else:
-                return default
-        return value
-
-    def set(self, key: str, value: Any):
-        """设置配置值"""
-        keys = key.split(".")
-        config = self._config
-        for k in keys[:-1]:
-            if k not in config:
-                config[k] = {}
-            config = config[k]
-        config[keys[-1]] = value
-
-    def save(self):
-        """保存配置到文件"""
-        # TODO: 实现配置保存
-        pass
-
-
-# 单例实例
-config = Config()

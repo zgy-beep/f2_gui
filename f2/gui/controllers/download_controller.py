@@ -43,8 +43,8 @@ def get_platform_config(platform: str) -> Dict[str, Any]:
 class UrlParseWorker(QObject):
     """URL预解析工作器 - 在独立线程中解析URL和获取用户ID（不调用API）"""
 
-    # 信号
-    finished = pyqtSignal(str, str, str, str)  # parsed_url, nickname, user_id, error
+    # 信号: parsed_url, nickname, user_id, url_type, error
+    finished = pyqtSignal(str, str, str, str, str)
 
     def __init__(self, platform: str, url: str, config: Dict[str, Any]):
         super().__init__()
@@ -62,16 +62,82 @@ class UrlParseWorker(QObject):
             self.loop.run_until_complete(self._do_parse())
         except Exception as e:
             logger.error(f"URL解析失败: {e}")
-            self.finished.emit(self.url, "", "", str(e))
+            self.finished.emit(self.url, "", "", "", str(e))
         finally:
             if self.loop:
                 self.loop.close()
 
+    async def _detect_url_type(self, url: str) -> str:
+        """检测 URL 类型（轻量级，不做网络请求）
+
+        Returns:
+            str: "video" | "user" | "mix" | "live" | "unknown"
+        """
+        import re
+
+        url_lower = url.lower()
+
+        # 抖音 URL 模式
+        if self.platform == "douyin":
+            # 直接输入 sec_user_id
+            if url.startswith("MS4wLjAB"):
+                return "user"
+            # 视频/图文链接
+            if "/video/" in url_lower or "/note/" in url_lower:
+                return "video"
+            # 用户主页链接
+            if (
+                "/user/" in url_lower
+                or "sec_uid=" in url_lower
+                or "/share/user/" in url_lower
+            ):
+                return "user"
+            # 合集链接
+            if "/collection/" in url_lower or "/mix/" in url_lower:
+                return "mix"
+            # 直播链接
+            if "/live/" in url_lower or "webcast" in url_lower:
+                return "live"
+            # 短链接需要后续重定向检测，这里返回 unknown
+            if "v.douyin.com" in url_lower:
+                return "unknown"
+
+        # TikTok URL 模式
+        elif self.platform == "tiktok":
+            if "/video/" in url_lower:
+                return "video"
+            if "/@" in url_lower and "/video/" not in url_lower:
+                return "user"
+            if "/live/" in url_lower:
+                return "live"
+
+        # 微博 URL 模式
+        elif self.platform == "weibo":
+            if re.search(r"/\d+/[A-Za-z0-9]+", url):
+                return "video"
+            if "/u/" in url_lower or "/profile/" in url_lower:
+                return "user"
+
+        # Twitter URL 模式
+        elif self.platform == "twitter":
+            if "/status/" in url_lower:
+                return "video"
+            if re.match(r"https?://(twitter|x)\.com/[^/]+/?$", url_lower):
+                return "user"
+
+        return "unknown"
+
     async def _do_parse(self):
-        """执行解析 - 提取URL和用户ID，尝试从本地数据库获取昵称"""
+        """执行解析 - 提取URL和用户ID，检测URL类型，尝试从本地数据库获取昵称
+
+        支持两种输入格式：
+        1. 标准URL（如 https://www.douyin.com/user/xxx）
+        2. 直接输入 sec_user_id（如 MS4wLjABAAAA...）
+        """
         parsed_url = self.url
         nickname = ""
         user_id = ""
+        url_type = "unknown"
 
         try:
             if self.platform == "douyin":
@@ -79,28 +145,58 @@ class UrlParseWorker(QObject):
                 from f2.apps.douyin.utils import SecUserIdFetcher
                 from f2.utils.utils import extract_valid_urls
 
-                # 提取有效URL
-                valid_url = extract_valid_urls(self.url)
-                if valid_url:
-                    parsed_url = valid_url
+                # 检查是否是直接输入的 sec_user_id（以 MS4wLjAB 开头的 Base64 字符串）
+                input_text = self.url.strip()
+                if input_text.startswith("MS4wLjAB") and not input_text.startswith(
+                    "http"
+                ):
+                    # 直接使用 sec_user_id
+                    user_id = input_text
+                    url_type = "user"
+                    # 构造标准URL供显示
+                    parsed_url = f"https://www.douyin.com/user/{input_text}"
+                    logger.info(f"检测到直接输入的 sec_user_id: {input_text[:20]}...")
 
-                # 获取用户ID
-                try:
-                    sec_user_id = await SecUserIdFetcher.get_sec_user_id(parsed_url)
-                    if sec_user_id:
-                        user_id = sec_user_id
+                    # 尝试从本地数据库获取用户昵称
+                    try:
+                        async with AsyncUserDB("douyin_users.db") as db:
+                            user_info = await db.get_user_info(user_id)
+                            if user_info:
+                                nickname = user_info.get("nickname", "")
+                    except Exception:
+                        pass
+                else:
+                    # 标准URL处理流程
+                    valid_url = extract_valid_urls(self.url)
+                    if valid_url:
+                        parsed_url = valid_url
 
-                        # 尝试从本地数据库获取用户昵称（不触发网络请求）
+                    # 检测 URL 类型
+                    url_type = await self._detect_url_type(parsed_url)
+
+                    # 获取用户ID（仅用户主页类型）
+                    if url_type in ["user", "unknown"]:
                         try:
-                            async with AsyncUserDB("douyin_users.db") as db:
-                                user_info = await db.get_user_info(sec_user_id)
-                                if user_info:
-                                    nickname = user_info.get("nickname", "")
-                        except Exception:
-                            pass  # 数据库查询失败不影响流程
+                            sec_user_id = await SecUserIdFetcher.get_sec_user_id(
+                                parsed_url
+                            )
+                            if sec_user_id:
+                                user_id = sec_user_id
+                                # 如果之前是 unknown，现在确定是用户主页
+                                if url_type == "unknown":
+                                    url_type = "user"
 
-                except Exception as e:
-                    logger.warning(f"获取用户ID失败: {e}")
+                                # 尝试从本地数据库获取用户昵称（不触发网络请求）
+                                try:
+                                    async with AsyncUserDB("douyin_users.db") as db:
+                                        user_info = await db.get_user_info(sec_user_id)
+                                        if user_info:
+                                            nickname = user_info.get("nickname", "")
+                                except Exception:
+                                    pass  # 数据库查询失败不影响流程
+
+                        except Exception as e:
+                            logger.warning(f"获取用户ID失败: {e}")
 
             elif self.platform == "tiktok":
                 from f2.utils.utils import extract_valid_urls
@@ -109,9 +205,10 @@ class UrlParseWorker(QObject):
                 if valid_url:
                     parsed_url = valid_url
 
-                # TikTok 暂不解析用户ID
+                # 检测 URL 类型
+                url_type = await self._detect_url_type(parsed_url)
 
-            # 其他平台只提取URL
+            # 其他平台只提取URL并检测类型
             else:
                 from f2.utils.utils import extract_valid_urls
 
@@ -119,13 +216,15 @@ class UrlParseWorker(QObject):
                 if valid_url:
                     parsed_url = valid_url
 
+                url_type = await self._detect_url_type(parsed_url)
+
             # 返回解析结果
-            self.finished.emit(parsed_url, nickname, user_id, "")
+            self.finished.emit(parsed_url, nickname, user_id, url_type, "")
 
         except Exception as e:
             logger.error(f"解析出错: {e}")
             # 即使解析失败，也返回原始URL
-            self.finished.emit(parsed_url, nickname, user_id, str(e))
+            self.finished.emit(parsed_url, nickname, user_id, url_type, str(e))
 
 
 class DownloadWorker(QObject):
@@ -544,6 +643,8 @@ class DownloadWorker(QObject):
         if mode == "one":
             # 单个作品下载 - 直接使用 handler
             handler = DouyinHandler(kwargs)
+            self.message.emit(self.task_id, "正在下载单个作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_one_video()
             self.message.emit(self.task_id, "单个作品下载完成")
             self.progress.emit(self.task_id, 100, 100)
@@ -554,26 +655,36 @@ class DownloadWorker(QObject):
 
         elif mode == "like":
             handler = DouyinHandler(kwargs)
+            self.message.emit(self.task_id, "正在获取喜欢的作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_like()
             self.progress.emit(self.task_id, 100, 100)
 
         elif mode == "collection":
             handler = DouyinHandler(kwargs)
+            self.message.emit(self.task_id, "正在获取收藏的作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_collection()
             self.progress.emit(self.task_id, 100, 100)
 
         elif mode == "mix":
             handler = DouyinHandler(kwargs)
+            self.message.emit(self.task_id, "正在获取合集作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_mix()
             self.progress.emit(self.task_id, 100, 100)
 
         elif mode == "music":
             handler = DouyinHandler(kwargs)
+            self.message.emit(self.task_id, "正在获取音乐收藏...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_music_collection()
             self.progress.emit(self.task_id, 100, 100)
 
         elif mode == "live":
             handler = DouyinHandler(kwargs)
+            self.message.emit(self.task_id, "正在获取直播...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_live()
             self.progress.emit(self.task_id, 100, 100)
 
@@ -581,25 +692,47 @@ class DownloadWorker(QObject):
             raise ValueError(f"抖音不支持的模式: {mode}")
 
     async def _download_douyin_user_posts(self, kwargs: Dict[str, Any]):
-        """下载抖音用户主页作品 - 带详细进度"""
+        """下载抖音用户主页作品 - 带详细进度
+
+        支持两种输入格式：
+        1. 标准URL（如 https://www.douyin.com/user/xxx）
+        2. 直接输入 sec_user_id（如 MS4wLjABAAAA...）
+        """
         from f2.apps.douyin.db import AsyncUserDB
         from f2.apps.douyin.dl import DouyinDownloader
         from f2.apps.douyin.handler import DouyinHandler
         from f2.apps.douyin.utils import SecUserIdFetcher
         from f2.utils.utils import extract_valid_urls
 
-        # 从分享文本中提取有效URL
-        raw_url = kwargs.get("url", "")
-        valid_url = extract_valid_urls(raw_url)
-        if valid_url:
-            kwargs["url"] = valid_url
-            self.url_parsed.emit(self.task_id, valid_url)  # 发送解析后的URL
-            self.message.emit(self.task_id, f"提取到链接: {valid_url}")
+        raw_url = kwargs.get("url", "").strip()
+        sec_user_id = None
 
-        # 获取用户ID
-        sec_user_id = await SecUserIdFetcher.get_sec_user_id(kwargs.get("url"))
+        # 检查是否是直接输入的 sec_user_id
+        if raw_url.startswith("MS4wLjAB") and not raw_url.startswith("http"):
+            sec_user_id = raw_url
+            # 构造标准URL
+            constructed_url = f"https://www.douyin.com/user/{sec_user_id}"
+            kwargs["url"] = constructed_url
+            self.url_parsed.emit(self.task_id, constructed_url)
+            self.message.emit(
+                self.task_id, f"直接使用 sec_user_id: {sec_user_id[:20]}..."
+            )
+        else:
+            # 从分享文本中提取有效URL
+            valid_url = extract_valid_urls(raw_url)
+            if valid_url:
+                kwargs["url"] = valid_url
+                self.url_parsed.emit(self.task_id, valid_url)
+                self.message.emit(self.task_id, f"提取到链接: {valid_url}")
+
+            # 获取用户ID
+            sec_user_id = await SecUserIdFetcher.get_sec_user_id(kwargs.get("url"))
+
         if not sec_user_id:
             raise ValueError("无法获取用户ID")
+
+        self.user_id = sec_user_id  # 保存用户ID
+        self.message.emit(self.task_id, f"获取到用户ID: {sec_user_id}")
 
         self.user_id = sec_user_id  # 保存用户ID
         self.message.emit(self.task_id, f"获取到用户ID: {sec_user_id}")
@@ -716,21 +849,33 @@ class DownloadWorker(QObject):
         handler = TiktokHandler(kwargs)
 
         if self.mode == "one":
+            self.message.emit(self.task_id, "正在下载单个视频...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_one_video()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "post":
+            self.message.emit(self.task_id, "正在获取用户主页作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_post()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "like":
+            self.message.emit(self.task_id, "正在获取喜欢的作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_like()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "collect":
+            self.message.emit(self.task_id, "正在获取收藏的作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_collect()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "mix":
+            self.message.emit(self.task_id, "正在获取合集作品...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_mix()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "live":
+            self.message.emit(self.task_id, "正在获取直播...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_live()
             self.progress.emit(self.task_id, 100, 100)
         else:
@@ -881,9 +1026,13 @@ class DownloadWorker(QObject):
         handler = WeiboHandler(kwargs)
 
         if self.mode == "one":
+            self.message.emit(self.task_id, "正在下载单条微博...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_one_video()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "post":
+            self.message.emit(self.task_id, "正在获取用户微博...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_weibo()
             self.progress.emit(self.task_id, 100, 100)
         else:
@@ -898,15 +1047,23 @@ class DownloadWorker(QObject):
         handler = TwitterHandler(kwargs)
 
         if self.mode == "one":
+            self.message.emit(self.task_id, "正在下载单条推文...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_one_tweet()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "post":
+            self.message.emit(self.task_id, "正在获取用户推文...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_tweet()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "like":
+            self.message.emit(self.task_id, "正在获取喜欢的推文...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_like()
             self.progress.emit(self.task_id, 100, 100)
         elif self.mode == "bookmark":
+            self.message.emit(self.task_id, "正在获取收藏的推文...")
+            self.progress.emit(self.task_id, -1, 100)  # 不确定进度模式
             await handler.handle_user_bookmark()
             self.progress.emit(self.task_id, 100, 100)
         else:

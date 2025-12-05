@@ -1,3 +1,10 @@
+# -*- coding:utf-8 -*-
+# @Information  :
+# @Author       : ZGY
+# @Date         : 2025-12-02 17:40:06
+# @FilePath     : /f2_gui/f2/gui/components/combobox.py
+# @LastEditTime : 2025-12-05 16:53:33
+
 """
 下拉框组件
 ~~~~~~~~~~

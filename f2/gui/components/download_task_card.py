@@ -1,17 +1,4 @@
 # -*- coding:utf-8 -*-
-# @Information  :
-# @Author       : ZGY
-# @Date         : 2025-12-01 13:43:20
-# @FilePath     : /f2_gui/f2/gui/components/download_task_card.py
-# @LastEditTime : 2025-12-04 09:32:47
-
-# -*- coding:utf-8 -*-
-# @Information  :
-# @Author       : ZGY
-# @Date         : 2025-12-01 13:43:20
-# @FilePath     : /f2_gui/f2/gui/components/download_task_card.py
-# @LastEditTime : 2025-12-03 11:49:32
-
 """
 下载任务卡片组件
 ~~~~~~~~~~~~~~
@@ -332,8 +319,34 @@ class DownloadTaskCard(BaseCard):
         if self._status == "downloading":
             self.pause_requested.emit()
 
+    def set_indeterminate(self, indeterminate: bool = True):
+        """设置不确定进度模式（脉冲动画）
+
+        Args:
+            indeterminate: True 开启脉冲动画模式，False 恢复正常进度模式
+        """
+        if indeterminate:
+            self.progress_bar.setMaximum(0)  # 设为0会显示脉冲动画
+            self.detail_label.setText("处理中...")
+        else:
+            self.progress_bar.setMaximum(100)
+            self._total = 100
+
     def set_progress(self, progress: int):
-        """设置进度百分比"""
+        """设置进度百分比
+
+        Args:
+            progress: 进度百分比 (0-100)，-1 表示不确定进度模式
+        """
+        if progress < 0:
+            # 不确定进度模式
+            self.set_indeterminate(True)
+            return
+
+        # 确保退出不确定模式
+        if self.progress_bar.maximum() == 0:
+            self.progress_bar.setMaximum(100)
+
         self.progress_bar.setValue(progress)
         self.detail_label.setText(f"{progress}%")
 

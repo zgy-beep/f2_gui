@@ -19,7 +19,6 @@ from PyQt6.QtCore import QDate, Qt, QTime, pyqtSignal
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QCheckBox,
-    QDateEdit,
     QFileDialog,
     QFrame,
     QGridLayout,
@@ -27,7 +26,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QScrollArea,
-    QTimeEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -40,6 +38,7 @@ from f2.gui.components.buttons import (
 )
 from f2.gui.components.collapsible_card import CollapsibleCard
 from f2.gui.components.combobox import StyledComboBox
+from f2.gui.components.datetime_edits import StyledDateEdit, StyledTimeEdit
 from f2.gui.components.inputs import StyledLineEdit, StyledTextEdit
 from f2.gui.components.spinbox import StyledSpinBox
 from f2.gui.components.tabwidget import StyledTabWidget
@@ -598,19 +597,16 @@ class SettingsPage(QWidget):
         start_layout = QHBoxLayout()
         start_layout.setSpacing(8)
 
-        self.start_date = QDateEdit()
-        self.start_date.setFixedHeight(32)
-        self.start_date.setFixedWidth(130)
-        self.start_date.setCalendarPopup(True)
+        self.start_date = StyledDateEdit()
+        self.start_date.setFixedWidth(149)
         self.start_date.setDate(QDate.currentDate().addMonths(-1))
         self.start_date.setDisplayFormat("yyyy-MM-dd")
         self.start_date.setEnabled(False)
         self.start_date.dateChanged.connect(self._on_time_manual_changed)
         start_layout.addWidget(self.start_date)
 
-        self.start_time = QTimeEdit()
-        self.start_time.setFixedHeight(32)
-        self.start_time.setFixedWidth(100)
+        self.start_time = StyledTimeEdit()
+        self.start_time.setFixedWidth(120)
         self.start_time.setTime(QTime(0, 0, 0))
         self.start_time.setDisplayFormat("HH:mm:ss")
         self.start_time.setEnabled(False)
@@ -630,19 +626,16 @@ class SettingsPage(QWidget):
         end_layout = QHBoxLayout()
         end_layout.setSpacing(8)
 
-        self.end_date = QDateEdit()
-        self.end_date.setFixedHeight(32)
-        self.end_date.setFixedWidth(130)
-        self.end_date.setCalendarPopup(True)
+        self.end_date = StyledDateEdit()
+        self.end_date.setFixedWidth(149)
         self.end_date.setDate(QDate.currentDate())
         self.end_date.setDisplayFormat("yyyy-MM-dd")
         self.end_date.setEnabled(False)
         self.end_date.dateChanged.connect(self._on_time_manual_changed)
         end_layout.addWidget(self.end_date)
 
-        self.end_time = QTimeEdit()
-        self.end_time.setFixedHeight(32)
-        self.end_time.setFixedWidth(100)
+        self.end_time = StyledTimeEdit()
+        self.end_time.setFixedWidth(120)
         self.end_time.setTime(QTime(23, 59, 59))
         self.end_time.setDisplayFormat("HH:mm:ss")
         self.end_time.setEnabled(False)

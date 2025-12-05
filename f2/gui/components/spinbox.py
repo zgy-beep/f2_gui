@@ -1,3 +1,10 @@
+# -*- coding:utf-8 -*-
+# @Information  :
+# @Author       : ZGY
+# @Date         : 2025-12-02 21:01:23
+# @FilePath     : /f2_gui/f2/gui/components/spinbox.py
+# @LastEditTime : 2025-12-05 16:35:49
+
 """
 数字输入框组件
 ~~~~~~~~~~~~~~

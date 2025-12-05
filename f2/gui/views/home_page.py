@@ -228,7 +228,9 @@ class HomePage(QWidget):
         self.input_stack.setFixedHeight(80)  # 固定输入区域高度
 
         # 单个链接输入 - 使用 UrlLineEdit 基类
-        self.url_input = UrlLineEdit(placeholder="粘贴用户主页链接或作品链接...")
+        self.url_input = UrlLineEdit(
+            placeholder="粘贴链接或 sec_user_id (如 MS4wLjAB...)"
+        )
         self.input_stack.addWidget(self.url_input)
 
         # 批量链接输入 - 使用 BatchTextEdit 基类
@@ -585,7 +587,8 @@ class HomePage(QWidget):
                 parent_layout.removeWidget(task_card)
         task_card.deleteLater()
 
-        # 更新计数
+        # 更新计数（同时更新队列和已完成的计数）
+        self._update_queue_count()
         self._update_completed_count()
 
         # 检查下载队列是否为空
@@ -601,6 +604,18 @@ class HomePage(QWidget):
                 # 使用中文名称显示，但存储英文值
                 display_name = MODE_NAMES.get(mode, mode)
                 self.mode_combo.addItem(display_name, mode)
+
+    def set_mode(self, mode: str):
+        """设置当前模式（供外部调用）
+
+        Args:
+            mode: 模式标识符 (one, post, like, mix, live 等)
+        """
+        # 查找模式对应的索引
+        for i in range(self.mode_combo.count()):
+            if self.mode_combo.itemData(i) == mode:
+                self.mode_combo.setCurrentIndex(i)
+                break
 
     def _switch_input_tab(self, index: int):
         """切换输入标签页"""

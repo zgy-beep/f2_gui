@@ -64,6 +64,8 @@ class MainWindow(QMainWindow):
 
         # 任务跟踪
         self._task_cards = {}  # task_id -> DownloadTaskCard
+        self._queue_started = False  # 标记队列是否已开始下载
+        self._queue_total = 0  # 队列开始时的任务总数
 
         # 预解析任务跟踪
         self._parse_workers = {}  # 用于跟踪解析工作器和线程
@@ -377,8 +379,19 @@ class MainWindow(QMainWindow):
 
     def _on_start_all_downloads(self):
         """开始下载所有待下载任务"""
-        for task_id, card in self._task_cards.items():
-            if card.status == "pending":
+        pending_tasks = [
+            task_id
+            for task_id, card in self._task_cards.items()
+            if card.status == "pending"
+        ]
+
+        if pending_tasks:
+            # 标记队列已开始，记录任务总数
+            self._queue_started = True
+            self._queue_total = len(pending_tasks)
+            show_click_tooltip(self, f"开始下载 {self._queue_total} 个任务", "🚀")
+
+            for task_id in pending_tasks:
                 self._start_single_task(task_id)
 
     def _on_start_download(self, platform: str, mode: str, urls: list):
@@ -406,7 +419,7 @@ class MainWindow(QMainWindow):
         # 连接信号
         thread.started.connect(worker.parse)
         worker.finished.connect(
-            lambda parsed_url, nickname, user_id, error: self._on_parse_finished(
+            lambda parsed_url, nickname, user_id, url_type, error: self._on_parse_finished(
                 task_id,
                 platform,
                 mode,
@@ -414,6 +427,7 @@ class MainWindow(QMainWindow):
                 parsed_url,
                 nickname,
                 user_id,
+                url_type,
                 error,
                 config,
             )
@@ -449,10 +463,21 @@ class MainWindow(QMainWindow):
         parsed_url: str,
         nickname: str,
         user_id: str,
+        url_type: str,
         error: str,
         config: dict,
     ):
-        """URL解析完成回调 - 创建任务卡片"""
+        """URL解析完成回调 - 创建任务卡片，自动切换模式"""
+        # 根据检测到的 URL 类型自动调整模式
+        auto_mode = self._auto_detect_mode(platform, mode, url_type)
+        if auto_mode != mode:
+            show_click_tooltip(
+                self, f"检测到{self._get_url_type_name(url_type)}链接，已切换模式", "🔄"
+            )
+            mode = auto_mode
+            # 同步更新首页的模式选择
+            self.home_page.set_mode(auto_mode)
+
         # 获取平台和模式的显示名称
         platform_name = PLATFORM_CONFIG.get(platform, {}).get("name", platform.upper())
         mode_name = MODE_NAMES.get(mode, mode)
@@ -499,6 +524,48 @@ class MainWindow(QMainWindow):
 
         # 更新统计
         self._update_stats()
+
+    def _auto_detect_mode(self, platform: str, current_mode: str, url_type: str) -> str:
+        """根据 URL 类型自动检测合适的模式
+
+        Args:
+            platform: 平台名称
+            current_mode: 当前选择的模式
+            url_type: 检测到的 URL 类型 (video/user/mix/live/unknown)
+
+        Returns:
+            str: 推荐的模式
+        """
+        if url_type == "unknown":
+            return current_mode
+
+        # URL类型到模式的映射
+        type_to_mode = {
+            "video": "one",  # 单个作品
+            "user": "post",  # 用户主页 -> 主页作品
+            "mix": "mix",  # 合集
+            "live": "live",  # 直播
+        }
+
+        suggested_mode = type_to_mode.get(url_type, current_mode)
+
+        # 检查平台是否支持该模式
+        platform_modes = PLATFORM_CONFIG.get(platform, {}).get("modes", [])
+        if suggested_mode in platform_modes:
+            return suggested_mode
+
+        return current_mode
+
+    def _get_url_type_name(self, url_type: str) -> str:
+        """获取 URL 类型的中文名称"""
+        type_names = {
+            "video": "单个作品",
+            "user": "用户主页",
+            "mix": "合集",
+            "live": "直播",
+            "unknown": "未知",
+        }
+        return type_names.get(url_type, url_type)
 
     def _cleanup_parse_worker(self, task_id: str):
         """清理解析工作器"""
@@ -588,11 +655,23 @@ class MainWindow(QMainWindow):
         self._update_stats()
 
     def _on_task_progress(self, task_id: str, current: int, total: int):
-        """任务进度更新"""
+        """任务进度更新
+
+        Args:
+            task_id: 任务ID
+            current: 当前进度，-1 表示不确定进度模式
+            total: 总进度
+        """
         if task_id in self._task_cards:
-            progress = int((current / total) * 100) if total > 0 else 0
             card = self._task_cards[task_id]
-            card.set_progress(progress)
+
+            if current < 0:
+                # 不确定进度模式（脉冲动画）
+                card.set_progress(-1)
+            else:
+                progress = int((current / total) * 100) if total > 0 else 0
+                card.set_progress(progress)
+
             # 强制刷新 UI
             card.progress_bar.repaint()
 
@@ -621,12 +700,21 @@ class MainWindow(QMainWindow):
     def _on_task_user_info_changed(self, task_id: str, nickname: str, user_id: str):
         """用户信息更新 - 更新任务卡片的用户名和ID"""
         if task_id in self._task_cards:
-            self._task_cards[task_id].set_user_info(nickname, user_id)
+            card = self._task_cards[task_id]
+            card.set_user_info(nickname, user_id)
+            # 同步更新 task_meta 以便历史记录正确保存
+            if hasattr(card, "task_meta"):
+                card.task_meta["nickname"] = nickname
+                card.task_meta["user_id"] = user_id
 
     def _on_task_url_parsed(self, task_id: str, parsed_url: str):
         """URL解析完成 - 更新任务卡片显示解析后的URL"""
         if task_id in self._task_cards:
-            self._task_cards[task_id].set_url(parsed_url)
+            card = self._task_cards[task_id]
+            card.set_url(parsed_url)
+            # 同步更新 task_meta 以便历史记录正确保存
+            if hasattr(card, "task_meta"):
+                card.task_meta["url"] = parsed_url
 
     def _on_task_completed(self, task_id: str, nickname: str):
         """任务完成 - 带用户名的完成通知"""
@@ -655,10 +743,48 @@ class MainWindow(QMainWindow):
             # 刷新历史页面
             self.history_page.refresh()
 
+        # 检查队列是否全部完成
+        self._check_queue_completion()
+
     def _on_task_finished(self, task_id: str):
         """任务完成"""
         # 状态已经由 task_status_changed 处理
         self._update_stats()
+        # 检查队列是否全部完成
+        self._check_queue_completion()
+
+    def _check_queue_completion(self):
+        """检查队列是否全部完成，发送通知"""
+        if not self._queue_started:
+            return
+
+        # 统计当前状态
+        pending = sum(
+            1 for card in self._task_cards.values() if card.status == "pending"
+        )
+        downloading = sum(
+            1 for card in self._task_cards.values() if card.status == "downloading"
+        )
+        completed = sum(
+            1 for card in self._task_cards.values() if card.status == "completed"
+        )
+        failed = sum(
+            1
+            for card in self._task_cards.values()
+            if card.status in ["failed", "error"]
+        )
+
+        # 如果没有待下载和正在下载的任务，说明队列完成
+        if pending == 0 and downloading == 0:
+            self._queue_started = False
+
+            # 显示队列完成通知
+            if failed > 0:
+                show_click_tooltip(
+                    self, f"队列完成：{completed} 成功，{failed} 失败", "⚠️"
+                )
+            else:
+                show_click_tooltip(self, f"🎉 全部 {completed} 个任务下载完成！", "✅")
 
     def _on_task_error(self, task_id: str, error: str):
         """任务出错"""
